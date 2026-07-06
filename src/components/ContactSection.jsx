@@ -2,9 +2,9 @@ import React from 'react';
 
 export default function ContactSection() {
   return (
-    <section id="contact" className="py-32 bg-gray-900 text-white">
+    <section id="contact" className="py-24 bg-gray-900 text-white">
       <div className="max-w-7xl mx-auto px-6 sm:px-8">
-        <div className="mb-20">
+        <div className="mb-14">
           <p className="text-sm uppercase tracking-widest text-gray-400 font-inter font-semibold mb-4">Get in Touch</p>
           <h2 className="font-poppins text-5xl md:text-6xl font-bold leading-tight">
             Let's talk about your project.
@@ -12,32 +12,27 @@ export default function ContactSection() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-20">
-          {/* Contact Methods */}
           <div>
             <div className="space-y-12">
-              {/* Phone */}
               <div>
                 <p className="text-sm uppercase tracking-widest text-gray-400 font-semibold mb-3">Phone</p>
                 <p className="text-2xl font-light">+91 (Your Phone Number)</p>
               </div>
 
-              {/* Email */}
               <div>
                 <p className="text-sm uppercase tracking-widest text-gray-400 font-semibold mb-3">Email</p>
                 <p className="text-2xl font-light">info@capsuleculture.com</p>
               </div>
 
-              {/* Address */}
               <div>
                 <p className="text-sm uppercase tracking-widest text-gray-400 font-semibold mb-3">Address</p>
                 <p className="text-xl font-light text-gray-300">Your Business Address<br />City, State PIN Code</p>
               </div>
 
-              {/* WhatsApp */}
               <div>
                 <p className="text-sm uppercase tracking-widest text-gray-400 font-semibold mb-4">Connect on WhatsApp</p>
-                <a 
-                  href="https://wa.me/919876543210" 
+                
+                  href="https://wa.me/919876543210"
                   className="inline-flex items-center gap-3 px-6 py-3 bg-green-500 text-white rounded-lg font-semibold hover:bg-green-600 transition-colors"
                 >
                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -49,7 +44,6 @@ export default function ContactSection() {
             </div>
           </div>
 
-          {/* Contact Form */}
           <div>
             <form className="space-y-6">
               <div>
