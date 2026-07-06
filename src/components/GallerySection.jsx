@@ -15,14 +15,14 @@ export default function GallerySection() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const categories = ['All', 'Exterior', 'Interior', 'Office', 'Living', 'Construction', 'Projects'];
-  
-  const filteredItems = selectedCategory === 'All' 
-    ? galleryItems 
+
+  const filteredItems = selectedCategory === 'All'
+    ? galleryItems
     : galleryItems.filter(item => item.category === selectedCategory);
 
   const handlePrevImage = () => {
     if (selectedImage && selectedImage.images.length > 0) {
-      setCurrentImageIndex((prev) => 
+      setCurrentImageIndex((prev) =>
         prev === 0 ? selectedImage.images.length - 1 : prev - 1
       );
     }
@@ -30,24 +30,23 @@ export default function GallerySection() {
 
   const handleNextImage = () => {
     if (selectedImage && selectedImage.images.length > 0) {
-      setCurrentImageIndex((prev) => 
+      setCurrentImageIndex((prev) =>
         prev === selectedImage.images.length - 1 ? 0 : prev + 1
       );
     }
   };
 
   return (
-    <section id="gallery" className="py-32 bg-white border-t-2 border-gray-100">
+    <section id="gallery" className="py-24 bg-white border-t-2 border-gray-100">
       <div className="max-w-7xl mx-auto px-6 sm:px-8">
-        <div className="mb-20">
+        <div className="mb-14">
           <p className="text-sm uppercase tracking-widest text-gray-500 font-inter font-semibold mb-4">Gallery</p>
           <h2 className="font-poppins text-5xl md:text-6xl font-bold text-gray-900 leading-tight">
             In the details.
           </h2>
         </div>
 
-        {/* Filter buttons */}
-        <div className="flex flex-wrap gap-3 mb-16">
+        <div className="flex flex-wrap gap-3 mb-14">
           {categories.map((category) => (
             <button
               key={category}
@@ -63,7 +62,6 @@ export default function GallerySection() {
           ))}
         </div>
 
-        {/* Gallery grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredItems.map((item) => (
             <div
@@ -71,12 +69,11 @@ export default function GallerySection() {
               className="group relative overflow-hidden bg-gray-100 aspect-square cursor-pointer rounded-2xl border border-gray-200 shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:scale-105"
               onClick={() => item.images && item.images.length > 0 && (setSelectedImage(item), setCurrentImageIndex(0))}
             >
-              {/* Placeholder */}
               <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
                 {item.images && item.images.length > 0 ? (
                   <>
-                    <img 
-                      src={item.images[0]} 
+                    <img
+                      src={item.images[0]}
                       alt={item.title}
                       className="w-full h-full object-contain"
                     />
@@ -94,10 +91,8 @@ export default function GallerySection() {
                 )}
               </div>
 
-              {/* Overlay - Bottom gradient only */}
               <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60 group-hover:opacity-70 transition-opacity duration-300"></div>
 
-              {/* Content */}
               <div className="absolute inset-0 flex items-end justify-start p-6">
                 <div className="w-full">
                   <div className="inline-block bg-white bg-opacity-20 backdrop-blur-sm px-3 py-1.5 rounded-lg mb-3">
@@ -111,24 +106,21 @@ export default function GallerySection() {
         </div>
       </div>
 
-      {/* Fullscreen Modal with Carousel */}
       {selectedImage && selectedImage.images && selectedImage.images.length > 0 && (
-        <div 
+        <div
           className="fixed inset-0 bg-black bg-opacity-95 z-50 flex items-center justify-center p-4"
           onClick={() => setSelectedImage(null)}
         >
-          <div 
+          <div
             className="relative max-w-5xl max-h-screen flex items-center justify-center w-full"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Main Image */}
-            <img 
-              src={selectedImage.images[currentImageIndex]} 
+            <img
+              src={selectedImage.images[currentImageIndex]}
               alt={`${selectedImage.title} ${currentImageIndex + 1}`}
               className="max-w-full max-h-screen object-contain"
             />
-            
-            {/* Close button */}
+
             <button
               onClick={() => setSelectedImage(null)}
               className="absolute top-4 right-4 text-white hover:text-gray-300 transition"
@@ -138,7 +130,6 @@ export default function GallerySection() {
               </svg>
             </button>
 
-            {/* Previous button */}
             {selectedImage.images.length > 1 && (
               <button
                 onClick={handlePrevImage}
@@ -150,7 +141,6 @@ export default function GallerySection() {
               </button>
             )}
 
-            {/* Next button */}
             {selectedImage.images.length > 1 && (
               <button
                 onClick={handleNextImage}
@@ -162,14 +152,12 @@ export default function GallerySection() {
               </button>
             )}
 
-            {/* Image counter */}
             {selectedImage.images.length > 1 && (
               <div className="absolute top-4 left-4 text-white bg-black bg-opacity-70 px-4 py-2 rounded-full text-sm font-semibold">
                 {currentImageIndex + 1} / {selectedImage.images.length}
               </div>
             )}
 
-            {/* Image info */}
             <div className="absolute bottom-4 left-4 text-white">
               <p className="text-sm uppercase tracking-wide">{selectedImage.category}</p>
               <h3 className="font-poppins font-bold text-xl">{selectedImage.title}</h3>
