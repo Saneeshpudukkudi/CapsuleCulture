@@ -11,9 +11,9 @@ const steps = [
 
 export default function ProcessSection() {
   return (
-    <section className="py-32 bg-white border-t-2 border-gray-100">
+    <section className="py-24 bg-white border-t-2 border-gray-100">
       <div className="max-w-7xl mx-auto px-6 sm:px-8">
-        <div className="mb-20">
+        <div className="mb-14">
           <p className="text-sm uppercase tracking-widest text-gray-500 font-inter font-semibold mb-4">Process</p>
           <h2 className="font-poppins text-5xl md:text-6xl font-bold text-gray-900 leading-tight">
             How it comes together.
@@ -32,7 +32,7 @@ export default function ProcessSection() {
           ))}
         </div>
 
-        <div className="text-center mt-20 pt-12">
+        <div className="text-center mt-14 pt-10 border-t border-gray-200">
           <p className="text-gray-600 font-light text-lg mb-8">Ready to get started?</p>
           <button className="px-8 py-4 bg-gray-900 text-white rounded-lg font-semibold hover:bg-gray-800 transition-colors">
             Schedule Consultation
