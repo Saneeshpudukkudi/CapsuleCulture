@@ -69,9 +69,9 @@ const features = [
 
 export default function FeaturesSection() {
   return (
-    <section id="features" className="py-32 bg-white border-t-2 border-gray-100">
+    <section id="features" className="py-24 bg-white border-t-2 border-gray-100">
       <div className="max-w-7xl mx-auto px-6 sm:px-8">
-        <div className="mb-20">
+        <div className="mb-14">
           <p className="text-sm uppercase tracking-widest text-gray-500 font-inter font-semibold mb-4">Why Capsule Culture</p>
           <h2 className="font-poppins text-5xl md:text-6xl font-bold text-gray-900 leading-tight">
             Engineered for confidence.
