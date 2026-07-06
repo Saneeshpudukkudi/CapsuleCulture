@@ -33,18 +33,25 @@ export default function FAQSection() {
   return (
     <section className="py-32 bg-gray-50 border-t-2 border-gray-100">
       <div className="px-6 sm:px-8">
-        <div className="max-w-7xl mx-auto mb-20">
-          <p className="text-sm uppercase tracking-widest text-gray-500 font-inter font-semibold mb-4">FAQ</p>
-          <h2 className="font-poppins text-5xl md:text-6xl font-bold text-gray-900 leading-tight">
-            Questions answered.
-          </h2>
+        <div className="max-w-7xl mx-auto mb-20 grid grid-cols-1 lg:grid-cols-2 gap-8 items-end">
+          <div>
+            <p className="text-sm uppercase tracking-widest text-gray-500 font-inter font-semibold mb-4">FAQ</p>
+            <h2 className="font-poppins text-5xl md:text-6xl font-bold text-gray-900 leading-tight">
+              Questions answered.
+            </h2>
+          </div>
+          <p className="text-lg text-gray-600 font-light lg:pb-2">
+            Everything you need to know before starting your project. Can't find what you're looking for? Reach out directly below.
+          </p>
         </div>
 
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {faqs.map((faq, index) => (
             <div
               key={index}
-              className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-lg transition-shadow duration-300"
+              className={`bg-white border rounded-xl p-6 hover:shadow-lg transition-all duration-300 ${
+                openIndex === index ? 'border-forge/40' : 'border-gray-200'
+              }`}
             >
               <button
                 onClick={() => setOpenIndex(openIndex === index ? null : index)}
@@ -52,8 +59,8 @@ export default function FAQSection() {
               >
                 <span className="font-poppins font-semibold text-base text-gray-900 pr-4">{faq.q}</span>
                 <svg
-                  className={`w-5 h-5 text-gray-900 flex-shrink-0 transition-transform duration-300 ${
-                    openIndex === index ? 'rotate-180' : ''
+                  className={`w-5 h-5 flex-shrink-0 transition-all duration-300 ${
+                    openIndex === index ? 'rotate-180 text-forge' : 'text-gray-900'
                   }`}
                   fill="none"
                   stroke="currentColor"
