@@ -31,9 +31,9 @@ export default function FAQSection() {
   const [openIndex, setOpenIndex] = useState(null);
 
   return (
-    <section className="py-32 bg-gray-50 border-t-2 border-gray-100">
+    <section className="py-24 bg-gray-50 border-t-2 border-gray-100">
       <div className="px-6 sm:px-8">
-        <div className="max-w-7xl mx-auto mb-20 grid grid-cols-1 lg:grid-cols-2 gap-8 items-end">
+        <div className="max-w-7xl mx-auto mb-14 grid grid-cols-1 lg:grid-cols-2 gap-8 items-end">
           <div>
             <p className="text-sm uppercase tracking-widest text-gray-500 font-inter font-semibold mb-4">FAQ</p>
             <h2 className="font-poppins text-5xl md:text-6xl font-bold text-gray-900 leading-tight">
@@ -84,7 +84,7 @@ export default function FAQSection() {
           ))}
         </div>
 
-        <div className="max-w-7xl mx-auto text-center mt-20 pt-12">
+        <div className="max-w-7xl mx-auto text-center mt-14 pt-10">
           <p className="text-gray-600 font-light text-lg mb-8">Didn't find your answer?</p>
           <button className="px-8 py-4 border-2 border-gray-900 text-gray-900 rounded-lg font-semibold hover:bg-gray-900 hover:text-white transition-colors">
             Get in Touch
