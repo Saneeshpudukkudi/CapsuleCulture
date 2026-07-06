@@ -16,16 +16,15 @@ export default function ProcessSection() {
         <div className="mb-20">
           <p className="text-sm uppercase tracking-widest text-gray-500 font-inter font-semibold mb-4">Process</p>
           <h2 className="font-poppins text-5xl md:text-6xl font-bold text-gray-900 leading-tight">
-            Built on excellence.
+            How it comes together.
           </h2>
         </div>
 
-        {/* Grid - 3 columns x 2 rows */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
           {steps.map((step, index) => (
             <div key={index} className="group cursor-pointer">
               <div className="mb-6">
-                <p className="text-5xl font-poppins font-bold text-gray-200">{step.number}</p>
+                <p className="text-5xl font-poppins font-bold text-forge-light group-hover:text-forge transition-colors duration-300">{step.number}</p>
               </div>
               <h3 className="font-poppins font-bold text-xl text-gray-900 mb-3 group-hover:text-gray-700 transition-colors">{step.title}</h3>
               <p className="text-gray-600 font-light">{step.desc}</p>
