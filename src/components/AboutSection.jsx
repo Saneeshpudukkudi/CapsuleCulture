@@ -11,9 +11,9 @@ const features = [
 
 export default function AboutSection() {
   return (
-    <section id="about" className="py-32 bg-white">
+    <section id="about" className="py-24 bg-white">
       <div className="max-w-7xl mx-auto px-6 sm:px-8">
-        <div className="mb-24">
+        <div className="mb-14">
           <p className="text-sm uppercase tracking-widest text-gray-500 font-inter font-semibold mb-4">About Capsule Culture</p>
           <h2 className="font-poppins text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
             Premium homes, reimagined.
