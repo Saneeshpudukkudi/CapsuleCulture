@@ -16,23 +16,23 @@ export default function ContactSection() {
             <div className="space-y-12">
               <div>
                 <p className="text-sm uppercase tracking-widest text-gray-400 font-semibold mb-3">Phone</p>
-                <p className="text-2xl font-light">+91 (Your Phone Number)</p>
+                <p className="text-2xl font-light">+91 8848337921</p>
               </div>
 
               <div>
                 <p className="text-sm uppercase tracking-widest text-gray-400 font-semibold mb-3">Email</p>
-                <p className="text-2xl font-light">info@capsuleculture.com</p>
+                <p className="text-2xl font-light">capsuleculturekerala@gmail.com</p>
               </div>
 
               <div>
                 <p className="text-sm uppercase tracking-widest text-gray-400 font-semibold mb-3">Address</p>
-                <p className="text-xl font-light text-gray-300">Your Business Address<br />City, State PIN Code</p>
+                <p className="text-xl font-light text-gray-300">Capsule Culture<br />Nest, Therur Palayode<br />Kannur, Kerala, India - 670595</p>
               </div>
 
               <div>
                 <p className="text-sm uppercase tracking-widest text-gray-400 font-semibold mb-4">Connect on WhatsApp</p>
-                <a
-                  href="https://wa.me/919876543210"
+                
+                  href="https://wa.me/918848337921"
                   className="inline-flex items-center gap-3 px-6 py-3 bg-green-500 text-white rounded-lg font-semibold hover:bg-green-600 transition-colors"
                 >
                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
