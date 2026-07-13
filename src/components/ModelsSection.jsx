@@ -144,13 +144,7 @@ export default function ModelsSection() {
           </div>
         </div>
 
-        <div className="mt-20 text-center border-t-2 border-gray-200 pt-12">
-          <h3 className="font-poppins text-3xl font-bold text-gray-900 mb-4">Custom Projects</h3>
-          <p className="text-gray-600 font-light mb-8 max-w-2xl mx-auto">Have a unique vision? We create bespoke capsule homes tailored to your specifications and aesthetic preferences.</p>
-          <button className="px-8 py-4 border-2 border-gray-900 text-gray-900 rounded-lg font-semibold hover:bg-gray-50 transition-colors duration-300">
-            Discuss Your Project
-          </button>
-        </div>
+
       </div>
     </section>
   );
