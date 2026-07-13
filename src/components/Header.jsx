@@ -54,7 +54,7 @@ export default function Header() {
             {navLinks.map((link) => (
               <li key={link.href}>
                 
-                  href={link.href}
+                  <a href={link.href}
                   onClick={() => setMenuOpen(false)}
                   className="hover:text-gray-900 transition font-light"
                 >
