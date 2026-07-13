@@ -1,6 +1,44 @@
-import React from 'react';
+import React, { useState } from 'react';
+
+// Replace YOUR_FORM_ID with the code Formspree gives you (from https://formspree.io/f/YOUR_FORM_ID)
+const FORMSPREE_ENDPOINT = 'https://formspree.io/f/xqerkpvw';
 
 export default function ContactSection() {
+  const [formData, setFormData] = useState({ name: '', email: '', phone: '', message: '' });
+  const [status, setStatus] = useState('idle'); // idle | submitting | success | error
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!formData.name || !formData.email || !formData.message) {
+      setStatus('error');
+      return;
+    }
+
+    setStatus('submitting');
+
+    try {
+      const response = await fetch(FORMSPREE_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        setStatus('success');
+        setFormData({ name: '', email: '', phone: '', message: '' });
+      } else {
+        setStatus('error');
+      }
+    } catch (err) {
+      setStatus('error');
+    }
+  };
+
   return (
     <section id="contact" className="py-24 bg-gray-900 text-white">
       <div className="max-w-7xl mx-auto px-6 sm:px-8">
@@ -45,11 +83,14 @@ export default function ContactSection() {
           </div>
 
           <div>
-            <form className="space-y-6">
+            <form className="space-y-6" onSubmit={handleSubmit}>
               <div>
                 <label className="block text-sm uppercase tracking-widest text-gray-400 font-semibold mb-3">Name</label>
                 <input
                   type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
                   placeholder="Your Name"
                   className="w-full px-0 py-3 bg-transparent border-b-2 border-gray-600 text-white focus:outline-none focus:border-white transition-colors placeholder-gray-600"
                 />
@@ -59,6 +100,9 @@ export default function ContactSection() {
                 <label className="block text-sm uppercase tracking-widest text-gray-400 font-semibold mb-3">Email</label>
                 <input
                   type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
                   placeholder="your@email.com"
                   className="w-full px-0 py-3 bg-transparent border-b-2 border-gray-600 text-white focus:outline-none focus:border-white transition-colors placeholder-gray-600"
                 />
@@ -68,6 +112,9 @@ export default function ContactSection() {
                 <label className="block text-sm uppercase tracking-widest text-gray-400 font-semibold mb-3">Phone</label>
                 <input
                   type="tel"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleChange}
                   placeholder="+91 9876543210"
                   className="w-full px-0 py-3 bg-transparent border-b-2 border-gray-600 text-white focus:outline-none focus:border-white transition-colors placeholder-gray-600"
                 />
@@ -76,15 +123,29 @@ export default function ContactSection() {
               <div>
                 <label className="block text-sm uppercase tracking-widest text-gray-400 font-semibold mb-3">Message</label>
                 <textarea
+                  name="message"
+                  value={formData.message}
+                  onChange={handleChange}
                   placeholder="Tell us about your project..."
                   rows="4"
                   className="w-full px-0 py-3 bg-transparent border-b-2 border-gray-600 text-white focus:outline-none focus:border-white transition-colors placeholder-gray-600 resize-none"
                 ></textarea>
               </div>
 
-              <button type="submit" className="w-full mt-8 px-8 py-4 bg-white text-gray-900 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
-                Send Message
+              <button
+                type="submit"
+                disabled={status === 'submitting'}
+                className="w-full mt-8 px-8 py-4 bg-white text-gray-900 rounded-lg font-semibold hover:bg-gray-100 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                {status === 'submitting' ? 'Sending...' : 'Send Message'}
               </button>
+
+              {status === 'success' && (
+                <p className="text-green-400 text-sm text-center">Thanks! Your message has been sent — we'll be in touch soon.</p>
+              )}
+              {status === 'error' && (
+                <p className="text-red-400 text-sm text-center">Please fill in your name, email, and message, then try again.</p>
+              )}
             </form>
           </div>
         </div>
