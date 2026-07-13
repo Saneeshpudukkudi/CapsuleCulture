@@ -79,12 +79,12 @@ export default function FAQSection() {
           ))}
         </div>
 
-        <div className="max-w-7xl mx-auto text-center mt-14 pt-10">
-          <p className="text-gray-600 font-light text-lg mb-8">Didn't find your answer?</p>
-          <button className="px-8 py-4 border-2 border-gray-900 text-gray-900 rounded-lg font-semibold hover:bg-gray-900 hover:text-white transition-colors">
-            Get in Touch
-          </button>
+))}
         </div>
+      </div>
+    </section>
+  );
+}
       </div>
     </section>
   );
