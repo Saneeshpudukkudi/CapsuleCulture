@@ -70,7 +70,7 @@ export default function ContactSection() {
               <div>
                 <p className="text-sm uppercase tracking-widest text-gray-400 font-semibold mb-4">Connect on WhatsApp</p>
                 
-                  href="https://wa.me/918848337921"
+                  <a href="https://wa.me/918848337921"
                   className="inline-flex items-center gap-3 px-6 py-3 bg-green-500 text-white rounded-lg font-semibold hover:bg-green-600 transition-colors"
                 >
                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
