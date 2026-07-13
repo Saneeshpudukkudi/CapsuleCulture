@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 
 const galleryItems = [
-  { id: 1, category: 'Exterior', title: 'Modern Architecture', images: ['/gallery-exterior1.jpg', '/gallery-exterior2.jpg'] },
-  { id: 2, category: 'Interior', title: 'Premium Living Spaces', images: [] },
-  { id: 3, category: 'Office', title: 'Professional Workspace', images: [] },
-  { id: 4, category: 'Living', title: 'Bedroom Design', images: [] },
-  { id: 5, category: 'Construction', title: 'Manufacturing', images: [] },
-  { id: 6, category: 'Projects', title: 'Installation', images: [] },
+  { id: 1, category: 'Exterior', title: 'Modern Architecture', images: ['/gallery-exterior1.jpg', '/gallery-exterior2.jpg', '/1%20(2).png'] },
+  { id: 2, category: 'Interior', title: 'Premium Living Spaces', images: ['/1%20(1).jpg', '/1%20(3).jpg', '/1%20(4).jpg', '/1%20(5).jpg', '/1%20(6).jpg', '/1%20(7).jpg'] },
+  { id: 3, category: 'Office', title: 'Professional Workspace', images: ['/1%20(8).jpg', '/1%20(9).jpg', '/1%20(10).jpg', '/1%20(11).jpg'] },
+  { id: 4, category: 'Living', title: 'Bedroom Design', images: ['/1%20(12).jpg', '/1%20(13).jpg', '/1%20(14).jpg', '/1%20(15).jpg', '/1%20(16).jpg'] },
+  { id: 5, category: 'Construction', title: 'Manufacturing', images: ['/1%20(17).jpg', '/1%20(18).jpg', '/1%20(19).jpg', '/1%20(20).jpg'] },
+  { id: 6, category: 'Projects', title: 'Installation', images: ['/1%20(21).jpg', '/1%20(22).jpg', '/1%20(23).jpg', '/1%20(24).jpg', '/1%20(25).jpg'] },
 ];
 
 export default function GallerySection() {
