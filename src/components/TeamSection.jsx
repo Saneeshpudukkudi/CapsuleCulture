@@ -36,12 +36,7 @@ export default function TeamSection() {
           </div>
         </div>
 
-        <div className="mt-14 text-center border-t border-gray-200 pt-10">
-          <p className="text-gray-600 font-light text-lg mb-8">Ready to be part of the capsule culture movement?</p>
-          <button className="px-8 py-4 bg-gray-900 text-white rounded-lg font-semibold hover:bg-gray-800 transition-colors">
-            Start Your Project
-          </button>
-        </div>
+
       </div>
     </section>
   );
