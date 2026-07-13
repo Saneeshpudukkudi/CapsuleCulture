@@ -7,6 +7,7 @@ const models = [
     size: '250 sq ft',
     desc: 'Luxury residential space with premium finishes and sophisticated design',
     features: ['Full kitchen', 'Master bedroom', 'Marble bathroom', 'Living area'],
+    image: '/1%20(26).jpg',
   },
   {
     id: 2,
@@ -14,6 +15,7 @@ const models = [
     size: '180 sq ft',
     desc: 'Elegant living space designed for the modern minimalist',
     features: ['Kitchenette', 'Bedroom', 'Bathroom', 'Compact living area'],
+    image: '/1%20(27).jpg',
   },
   {
     id: 3,
@@ -21,6 +23,7 @@ const models = [
     size: '200 sq ft',
     desc: 'Professional workspace with architectural precision',
     features: ['Open workspace', 'Meeting area', 'Storage', 'Climate control'],
+    image: '/1%20(28).jpg',
   },
   {
     id: 4,
@@ -28,6 +31,7 @@ const models = [
     size: '100 sq ft',
     desc: 'Secure monitoring station with premium finishes',
     features: ['360° visibility', 'Security systems', 'Comfortable seating', 'Climate controlled'],
+    image: '/1%20(1).png',
   },
 ];
 
@@ -96,11 +100,12 @@ export default function ModelsSection() {
                 key={model.id}
                 className="bg-white rounded-2xl overflow-hidden hover:shadow-xl transition-shadow duration-500 flex-shrink-0 w-[340px] sm:w-[380px]"
               >
-                <div className="h-48 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="text-6xl text-gray-300 mb-2">□</div>
-                    <p className="text-gray-400 text-sm">Product image</p>
-                  </div>
+                <div className="h-48 bg-gray-100 overflow-hidden">
+                  <img
+                    src={model.image}
+                    alt={model.name}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
 
                 <div className="p-8">
