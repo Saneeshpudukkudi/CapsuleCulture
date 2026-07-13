@@ -59,7 +59,7 @@ export default function ContactSection() {
 
               <div>
                 <p className="text-sm uppercase tracking-widest text-gray-400 font-semibold mb-3">Email</p>
-                <p className="text-2xl font-light">capsuleculturekerala@gmail.com</p>
+                <p className="text-2xl font-light">capsuleculture.kerala@gmail.com</p>
               </div>
 
               <div>
