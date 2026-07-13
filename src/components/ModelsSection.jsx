@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef } from 'react';
 
 const models = [
   {
@@ -37,42 +37,34 @@ const models = [
 
 export default function ModelsSection() {
   const viewportRef = useRef(null);
-  const trackRef = useRef(null);
-  const targetX = useRef(0);
-  const currentX = useRef(0);
-  const rafId = useRef(null);
+  const isDragging = useRef(false);
+  const dragStartX = useRef(0);
+  const dragStartScroll = useRef(0);
 
-  useEffect(() => {
-    const animate = () => {
-      currentX.current += (targetX.current - currentX.current) * 0.08;
-      if (trackRef.current) {
-        trackRef.current.style.transform = `translateX(${currentX.current}px)`;
-      }
-      rafId.current = requestAnimationFrame(animate);
-    };
-    rafId.current = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(rafId.current);
-  }, []);
+  const scrollByAmount = (amount) => {
+    viewportRef.current?.scrollBy({ left: amount, behavior: 'smooth' });
+  };
+
+  const handleMouseDown = (e) => {
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+    isDragging.current = true;
+    dragStartX.current = e.pageX;
+    dragStartScroll.current = viewport.scrollLeft;
+    viewport.classList.add('cursor-grabbing');
+  };
+
+  const stopDragging = () => {
+    isDragging.current = false;
+    viewportRef.current?.classList.remove('cursor-grabbing');
+  };
 
   const handleMouseMove = (e) => {
     const viewport = viewportRef.current;
-    const track = trackRef.current;
-    if (!viewport || !track) return;
-
-    const viewportWidth = viewport.offsetWidth;
-    const trackWidth = track.scrollWidth;
-    const maxOffset = Math.max(trackWidth - viewportWidth, 0);
-
-    if (maxOffset === 0) return;
-
-    const rect = viewport.getBoundingClientRect();
-    const ratio = Math.min(Math.max((e.clientX - rect.left) / viewportWidth, 0), 1);
-
-    targetX.current = -ratio * maxOffset;
-  };
-
-  const handleMouseLeave = () => {
-    targetX.current = 0;
+    if (!isDragging.current || !viewport) return;
+    e.preventDefault();
+    const delta = e.pageX - dragStartX.current;
+    viewport.scrollLeft = dragStartScroll.current - delta;
   };
 
   return (
@@ -85,16 +77,37 @@ export default function ModelsSection() {
               Thoughtfully designed spaces.
             </h2>
           </div>
-          <p className="text-sm text-gray-400 font-inter hidden md:block">Move your mouse across to explore →</p>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => scrollByAmount(-380)}
+              aria-label="Scroll left"
+              className="w-11 h-11 flex items-center justify-center rounded-full border-2 border-gray-900 text-gray-900 hover:bg-gray-900 hover:text-white transition-colors duration-300"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <button
+              onClick={() => scrollByAmount(380)}
+              aria-label="Scroll right"
+              className="w-11 h-11 flex items-center justify-center rounded-full border-2 border-gray-900 text-gray-900 hover:bg-gray-900 hover:text-white transition-colors duration-300"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
         </div>
 
         <div
           ref={viewportRef}
+          onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
-          onMouseLeave={handleMouseLeave}
-          className="overflow-hidden cursor-none"
+          onMouseUp={stopDragging}
+          onMouseLeave={stopDragging}
+          className="overflow-x-auto scrollbar-visible cursor-grab select-none pb-4"
         >
-          <div ref={trackRef} className="flex gap-8 will-change-transform">
+          <div className="flex gap-8 w-max">
             {models.map((model) => (
               <div
                 key={model.id}
