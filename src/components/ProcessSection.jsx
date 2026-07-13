@@ -32,12 +32,7 @@ export default function ProcessSection() {
           ))}
         </div>
 
-        <div className="text-center mt-14 pt-10 border-t border-gray-200">
-          <p className="text-gray-600 font-light text-lg mb-8">Ready to get started?</p>
-          <button className="px-8 py-4 bg-gray-900 text-white rounded-lg font-semibold hover:bg-gray-800 transition-colors">
-            Schedule Consultation
-          </button>
-        </div>
+
       </div>
     </section>
   );
