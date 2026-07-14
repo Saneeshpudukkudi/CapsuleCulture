@@ -27,10 +27,7 @@ export default function Header() {
           ))}
         </ul>
 
-        
-          href="#contact"
-          className="px-6 py-2 bg-gray-900 text-white rounded-lg font-semibold text-sm hover:bg-gray-800 transition-colors hidden sm:block"
-        >
+        <a href="#contact" className="px-6 py-2 bg-gray-900 text-white rounded-lg font-semibold text-sm hover:bg-gray-800 transition-colors hidden sm:block">
           Get a Quote
         </a>
 
@@ -56,21 +53,13 @@ export default function Header() {
           <ul className="flex flex-col space-y-5 text-gray-700 font-inter text-base">
             {navLinks.map((link) => (
               <li key={link.href}>
-                
-                  href={link.href}
-                  onClick={() => setMenuOpen(false)}
-                  className="hover:text-gray-900 transition font-light"
-                >
+                <a href={link.href} onClick={() => setMenuOpen(false)} className="hover:text-gray-900 transition font-light">
                   {link.label}
                 </a>
               </li>
             ))}
           </ul>
-          
-            href="#contact"
-            onClick={() => setMenuOpen(false)}
-            className="block w-full mt-6 px-6 py-3 bg-gray-900 text-white rounded-lg font-semibold text-sm text-center hover:bg-gray-800 transition-colors"
-          >
+          <a href="#contact" onClick={() => setMenuOpen(false)} className="block w-full mt-6 px-6 py-3 bg-gray-900 text-white rounded-lg font-semibold text-sm text-center hover:bg-gray-800 transition-colors">
             Get a Quote
           </a>
         </div>
