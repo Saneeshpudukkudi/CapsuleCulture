@@ -27,9 +27,12 @@ export default function Header() {
           ))}
         </ul>
 
-        <button className="px-6 py-2 bg-gray-900 text-white rounded-lg font-semibold text-sm hover:bg-gray-800 transition-colors hidden sm:block">
+        
+          href="#contact"
+          className="px-6 py-2 bg-gray-900 text-white rounded-lg font-semibold text-sm hover:bg-gray-800 transition-colors hidden sm:block"
+        >
           Get a Quote
-        </button>
+        </a>
 
         <button
           onClick={() => setMenuOpen(!menuOpen)}
@@ -54,7 +57,7 @@ export default function Header() {
             {navLinks.map((link) => (
               <li key={link.href}>
                 
-                  <a href={link.href}
+                  href={link.href}
                   onClick={() => setMenuOpen(false)}
                   className="hover:text-gray-900 transition font-light"
                 >
@@ -63,12 +66,13 @@ export default function Header() {
               </li>
             ))}
           </ul>
-          <button
+          
+            href="#contact"
             onClick={() => setMenuOpen(false)}
-            className="w-full mt-6 px-6 py-3 bg-gray-900 text-white rounded-lg font-semibold text-sm hover:bg-gray-800 transition-colors"
+            className="block w-full mt-6 px-6 py-3 bg-gray-900 text-white rounded-lg font-semibold text-sm text-center hover:bg-gray-800 transition-colors"
           >
             Get a Quote
-          </button>
+          </a>
         </div>
       )}
     </header>
