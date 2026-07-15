@@ -49,6 +49,7 @@ export default function Footer() {
                 IG
               </a>
               <a href="https://wa.me/918848337921" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" className="w-10 h-10 border border-gray-700 rounded-lg flex items-center justify-center hover:border-white hover:text-white transition text-sm font-semibold">
+              <a href="https://wa.me/918848337921" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" className="w-10 h-10 border border-gray-700 rounded-lg flex items-center justify-center hover:border-white hover:text-white transition text-sm font-semibold">
                 W
               </a>
             </div>
