@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import Lenis from 'lenis';
 import './index.css';
 import Header from './components/Header';
 import HeroSection from './components/HeroSection';
@@ -13,6 +14,23 @@ import ContactSection from './components/ContactSection';
 import Footer from './components/Footer';
 
 function App() {
+
+  useEffect(() => {
+    const lenis = new Lenis({
+      duration: 1.2,
+      smoothWheel: true,
+    });
+
+    function raf(time) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+    requestAnimationFrame(raf);
+
+    return () => {
+      lenis.destroy();
+    };
+  }, []);
 
   return (
     <div className="min-h-screen bg-white">
