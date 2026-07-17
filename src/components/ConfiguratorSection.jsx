@@ -69,8 +69,6 @@ const PRICE_PER_EXTRA_LENGTH_2FT = 75000;
 const PRICE_PER_EXTRA_WIDTH_2FT = 90000;
 const PRICE_PER_HEIGHT_FT = 30000;
 
-const STEPS = ['Model', 'Size', 'Exterior Style', 'Color', 'Deck', 'Interior', 'Summary'];
-
 function formatINR(amount) {
   return `₹${Math.round(amount / 1000) * 1000}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 }
@@ -99,8 +97,15 @@ function PickerGrid({ options, value, onChange, columns = 3 }) {
   );
 }
 
+const STEP_ORDER = ['model', 'size', 'style', 'color', 'deck', 'interior'];
+
+function nextStepAfter(id) {
+  const idx = STEP_ORDER.indexOf(id);
+  return idx >= 0 && idx < STEP_ORDER.length - 1 ? STEP_ORDER[idx + 1] : null;
+}
+
 export default function ConfiguratorSection() {
-  const [stepIndex, setStepIndex] = useState(0);
+  const [openStep, setOpenStep] = useState('model');
   const [modelId, setModelId] = useState('studio');
   const [width, setWidth] = useState(10);
   const [length, setLength] = useState(16);
@@ -127,6 +132,22 @@ export default function ConfiguratorSection() {
     setKitchenId(d.kitchen);
     setBedroomId(d.bedroom);
     setDeckId(d.deck);
+    setOpenStep(nextStepAfter('model'));
+  };
+
+  const chooseStyle = (id) => {
+    setStyleId(id);
+    setOpenStep(nextStepAfter('style'));
+  };
+
+  const chooseColor = (id) => {
+    setColorId(id);
+    setOpenStep(nextStepAfter('color'));
+  };
+
+  const chooseDeck = (id) => {
+    setDeckId(id);
+    setOpenStep(nextStepAfter('deck'));
   };
 
   const sqft = width * length;
@@ -187,9 +208,6 @@ export default function ConfiguratorSection() {
 
   const summaryLine = `${model.label} model — ${width} x ${length} ft (${sqft} sqft), ${height} ft height, ${styleOpt.label} style, ${colorOpt.label} exterior, ${deckOpt.label} deck, ${kitchenOpt.label} kitchen, ${bedroomOpt.label}`;
   const whatsappMessage = encodeURIComponent(`Hi Capsule Culture, I'd like a quote for: ${summaryLine}. Estimated price: ${formatINR(price)}.`);
-
-  const goNext = () => setStepIndex((i) => Math.min(i + 1, STEPS.length - 1));
-  const goBack = () => setStepIndex((i) => Math.max(i - 1, 0));
 
   return (
     <section id="configure" className="py-24 bg-white border-t-2 border-gray-100">
@@ -288,142 +306,155 @@ export default function ConfiguratorSection() {
           </div>
 
           <div>
-            <div className="flex items-center gap-2 mb-8">
-              {STEPS.map((label, i) => (
-                <button
-                  key={label}
-                  onClick={() => setStepIndex(i)}
-                  aria-label={`Go to step ${i + 1}: ${label}`}
-                  className={`h-2 rounded-full transition-all ${i === stepIndex ? 'w-8 bg-gray-900' : 'w-2 bg-gray-200 hover:bg-gray-400'}`}
-                />
-              ))}
-            </div>
-            <p className="text-xs uppercase tracking-widest text-gray-400 font-semibold mb-2">
-              Step {stepIndex + 1} of {STEPS.length}
-            </p>
-            <h3 className="font-poppins text-2xl font-bold text-gray-900 mb-6">{STEPS[stepIndex]}</h3>
-
-            {stepIndex === 0 && (
-              <PickerGrid options={MODELS} value={modelId} onChange={applyModel} />
-            )}
-
-            {stepIndex === 1 && (
-              <div>
-                <p className="text-sm uppercase tracking-widest text-gray-500 font-semibold mb-3">Width</p>
-                <div className="flex flex-wrap gap-3 mb-6">
-                  {WIDTH_OPTIONS.map((w) => (
-                    <button
-                      key={w}
-                      onClick={() => setWidth(w)}
-                      className={`px-5 py-2 rounded-lg text-sm font-semibold border-2 ${
-                        width === w ? 'bg-gray-900 border-gray-900 text-white' : 'bg-white border-gray-200 text-gray-700 hover:border-gray-400'
-                      }`}
+            {[
+              { id: 'model', title: 'Model', summary: model.label },
+              { id: 'size', title: 'Size', summary: `${width} x ${length} x ${height} ft — ${sqft} sqft` },
+              { id: 'style', title: 'Exterior Style', summary: styleOpt.label },
+              { id: 'color', title: 'Color', summary: colorOpt.label },
+              { id: 'deck', title: 'Deck', summary: deckOpt.label },
+              { id: 'interior', title: 'Interior', summary: `${kitchenOpt.label} kitchen, ${bedroomOpt.label}` },
+            ].map(({ id, title, summary }) => {
+              const isOpen = openStep === id;
+              return (
+                <div key={id} className="border-b border-gray-200 py-5">
+                  <button
+                    onClick={() => setOpenStep(isOpen ? null : id)}
+                    className="w-full flex items-center justify-between text-left"
+                  >
+                    <div>
+                      <p className="text-xs uppercase tracking-widest text-gray-400 font-semibold">{title}</p>
+                      <p className="text-base font-semibold text-gray-900 mt-1">{summary}</p>
+                    </div>
+                    <svg
+                      className={`w-5 h-5 text-gray-500 transition-transform flex-shrink-0 ${isOpen ? 'rotate-180' : ''}`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
                     >
-                      {w} ft
-                    </button>
-                  ))}
-                </div>
-                <p className="text-sm uppercase tracking-widest text-gray-500 font-semibold mb-3">Length</p>
-                <div className="flex flex-wrap gap-3 mb-6">
-                  {LENGTH_OPTIONS.map((l) => (
-                    <button
-                      key={l}
-                      onClick={() => setLength(l)}
-                      className={`px-5 py-2 rounded-lg text-sm font-semibold border-2 ${
-                        length === l ? 'bg-gray-900 border-gray-900 text-white' : 'bg-white border-gray-200 text-gray-700 hover:border-gray-400'
-                      }`}
-                    >
-                      {l} ft
-                    </button>
-                  ))}
-                </div>
-                <p className="text-sm uppercase tracking-widest text-gray-500 font-semibold mb-3">Height</p>
-                <div className="flex flex-wrap gap-3 mb-6">
-                  {[8, 9, 10, 11].map((h) => (
-                    <button
-                      key={h}
-                      onClick={() => setHeight(h)}
-                      className={`px-5 py-2 rounded-lg text-sm font-semibold border-2 ${
-                        height === h ? 'bg-gray-900 border-gray-900 text-white' : 'bg-white border-gray-200 text-gray-700 hover:border-gray-400'
-                      }`}
-                    >
-                      {h} ft
-                    </button>
-                  ))}
-                </div>
-                <p className="text-sm text-gray-600 font-light">Total area: <span className="font-semibold text-gray-900">{sqft} sqft</span></p>
-              </div>
-            )}
-
-            {stepIndex === 2 && (
-              <PickerGrid options={EXTERIOR_STYLES} value={styleId} onChange={setStyleId} columns={2} />
-            )}
-
-            {stepIndex === 3 && (
-              <div className="flex flex-wrap gap-4">
-                {COLORS.map((c) => (
-                  <button key={c.id} onClick={() => setColorId(c.id)} className="flex flex-col items-center gap-2" aria-label={c.label}>
-                    <span
-                      className="w-12 h-12 rounded-full border-2"
-                      style={{ backgroundColor: c.hex, borderColor: colorId === c.id ? '#111827' : '#e5e7eb', boxShadow: colorId === c.id ? '0 0 0 2px #111827' : 'none' }}
-                    />
-                    <span className="text-xs text-gray-600 font-medium">{c.label}</span>
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
                   </button>
-                ))}
-              </div>
-            )}
 
-            {stepIndex === 4 && (
-              <PickerGrid options={DECKS} value={deckId} onChange={setDeckId} columns={2} />
-            )}
+                  {isOpen && (
+                    <div className="mt-5">
+                      {id === 'model' && <PickerGrid options={MODELS} value={modelId} onChange={applyModel} />}
 
-            {stepIndex === 5 && (
-              <div>
-                <p className="text-sm uppercase tracking-widest text-gray-500 font-semibold mb-3">Kitchen</p>
-                <PickerGrid options={KITCHENS} value={kitchenId} onChange={setKitchenId} />
-                <p className="text-sm uppercase tracking-widest text-gray-500 font-semibold mb-3 mt-8">Bedroom</p>
-                <PickerGrid options={BEDROOMS} value={bedroomId} onChange={setBedroomId} />
-              </div>
-            )}
+                      {id === 'size' && (
+                        <div>
+                          <p className="text-sm uppercase tracking-widest text-gray-500 font-semibold mb-3">Width</p>
+                          <div className="flex flex-wrap gap-3 mb-6">
+                            {WIDTH_OPTIONS.map((w) => (
+                              <button
+                                key={w}
+                                onClick={() => setWidth(w)}
+                                className={`px-5 py-2 rounded-lg text-sm font-semibold border-2 ${
+                                  width === w ? 'bg-gray-900 border-gray-900 text-white' : 'bg-white border-gray-200 text-gray-700 hover:border-gray-400'
+                                }`}
+                              >
+                                {w} ft
+                              </button>
+                            ))}
+                          </div>
+                          <p className="text-sm uppercase tracking-widest text-gray-500 font-semibold mb-3">Length</p>
+                          <div className="flex flex-wrap gap-3 mb-6">
+                            {LENGTH_OPTIONS.map((l) => (
+                              <button
+                                key={l}
+                                onClick={() => setLength(l)}
+                                className={`px-5 py-2 rounded-lg text-sm font-semibold border-2 ${
+                                  length === l ? 'bg-gray-900 border-gray-900 text-white' : 'bg-white border-gray-200 text-gray-700 hover:border-gray-400'
+                                }`}
+                              >
+                                {l} ft
+                              </button>
+                            ))}
+                          </div>
+                          <p className="text-sm uppercase tracking-widest text-gray-500 font-semibold mb-3">Height</p>
+                          <div className="flex flex-wrap gap-3 mb-6">
+                            {[8, 9, 10, 11].map((h) => (
+                              <button
+                                key={h}
+                                onClick={() => setHeight(h)}
+                                className={`px-5 py-2 rounded-lg text-sm font-semibold border-2 ${
+                                  height === h ? 'bg-gray-900 border-gray-900 text-white' : 'bg-white border-gray-200 text-gray-700 hover:border-gray-400'
+                                }`}
+                              >
+                                {h} ft
+                              </button>
+                            ))}
+                          </div>
+                          <p className="text-sm text-gray-600 font-light mb-4">
+                            Total area: <span className="font-semibold text-gray-900">{sqft} sqft</span>
+                          </p>
+                          <button
+                            onClick={() => setOpenStep(nextStepAfter('size'))}
+                            className="px-6 py-2 rounded-lg bg-gray-900 text-white text-sm font-semibold hover:bg-gray-800"
+                          >
+                            Done
+                          </button>
+                        </div>
+                      )}
 
-            {stepIndex === 6 && (
-              <div>
-                <p className="text-gray-700 font-light mb-8">{summaryLine}.</p>
-                <div className="flex flex-wrap gap-4">
-                  <a
-                    href={`https://wa.me/918848337921?text=${whatsappMessage}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-8 py-4 bg-green-500 text-white rounded-lg font-semibold hover:bg-green-600 transition-colors"
-                  >
-                    WhatsApp Quote
-                  </a>
-                  <a
-                    href="#contact"
-                    className="px-8 py-4 border-2 border-gray-900 text-gray-900 rounded-lg font-semibold hover:bg-gray-900 hover:text-white transition-colors"
-                  >
-                    Get a Detailed Quote
-                  </a>
+                      {id === 'style' && <PickerGrid options={EXTERIOR_STYLES} value={styleId} onChange={chooseStyle} columns={2} />}
+
+                      {id === 'color' && (
+                        <div className="flex flex-wrap gap-4">
+                          {COLORS.map((c) => (
+                            <button key={c.id} onClick={() => chooseColor(c.id)} className="flex flex-col items-center gap-2" aria-label={c.label}>
+                              <span
+                                className="w-12 h-12 rounded-full border-2"
+                                style={{
+                                  backgroundColor: c.hex,
+                                  borderColor: colorId === c.id ? '#111827' : '#e5e7eb',
+                                  boxShadow: colorId === c.id ? '0 0 0 2px #111827' : 'none',
+                                }}
+                              />
+                              <span className="text-xs text-gray-600 font-medium">{c.label}</span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+
+                      {id === 'deck' && <PickerGrid options={DECKS} value={deckId} onChange={chooseDeck} columns={2} />}
+
+                      {id === 'interior' && (
+                        <div>
+                          <p className="text-sm uppercase tracking-widest text-gray-500 font-semibold mb-3">Kitchen</p>
+                          <PickerGrid options={KITCHENS} value={kitchenId} onChange={setKitchenId} />
+                          <p className="text-sm uppercase tracking-widest text-gray-500 font-semibold mb-3 mt-8">Bedroom</p>
+                          <PickerGrid options={BEDROOMS} value={bedroomId} onChange={setBedroomId} />
+                          <button
+                            onClick={() => setOpenStep(null)}
+                            className="mt-6 px-6 py-2 rounded-lg bg-gray-900 text-white text-sm font-semibold hover:bg-gray-800"
+                          >
+                            Done
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
-              </div>
-            )}
+              );
+            })}
 
-            <div className="flex justify-between mt-10 pt-8 border-t border-gray-200">
-              <button
-                onClick={goBack}
-                disabled={stepIndex === 0}
-                className="px-6 py-3 rounded-lg font-semibold text-sm border-2 border-gray-200 text-gray-700 disabled:opacity-40 disabled:cursor-not-allowed hover:border-gray-400"
-              >
-                Back
-              </button>
-              {stepIndex < STEPS.length - 1 && (
-                <button
-                  onClick={goNext}
-                  className="px-8 py-3 rounded-lg font-semibold text-sm bg-gray-900 text-white hover:bg-gray-800"
+            <div className="pt-8">
+              <p className="text-gray-700 font-light mb-6">{summaryLine}.</p>
+              <div className="flex flex-wrap gap-4">
+                
+                  href={`https://wa.me/918848337921?text=${whatsappMessage}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-8 py-4 bg-green-500 text-white rounded-lg font-semibold hover:bg-green-600 transition-colors"
                 >
-                  Next
-                </button>
-              )}
+                  WhatsApp Quote
+                </a>
+                
+                  href="#contact"
+                  className="px-8 py-4 border-2 border-gray-900 text-gray-900 rounded-lg font-semibold hover:bg-gray-900 hover:text-white transition-colors"
+                >
+                  Get a Detailed Quote
+                </a>
+              </div>
             </div>
           </div>
         </div>
