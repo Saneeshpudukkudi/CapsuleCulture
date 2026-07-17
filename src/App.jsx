@@ -5,6 +5,7 @@ import Header from './components/Header';
 import HeroSection from './components/HeroSection';
 import AboutSection from './components/AboutSection';
 import ModelsSection from './components/ModelsSection';
+import ConfiguratorSection from './components/ConfiguratorSection';
 import FeaturesSection from './components/FeaturesSection';
 import GallerySection from './components/GallerySection';
 import ProcessSection from './components/ProcessSection';
