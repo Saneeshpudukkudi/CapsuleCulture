@@ -17,6 +17,13 @@ html, body, #root {
 
 html {
   scroll-behavior: smooth;
+  scroll-snap-type: y proximity;
+}
+
+body > #root > div > section,
+body > #root > div > header {
+  scroll-snap-align: start;
+  scroll-snap-stop: normal;
 }
 
 body {
