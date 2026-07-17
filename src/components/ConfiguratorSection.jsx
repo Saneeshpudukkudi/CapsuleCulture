@@ -441,7 +441,7 @@ export default function ConfiguratorSection() {
               <p className="text-gray-700 font-light mb-6">{summaryLine}.</p>
               <div className="flex flex-wrap gap-4">
                 
-                  href={`https://wa.me/918848337921?text=${whatsappMessage}`}
+                   <a href={`https://wa.me/918848337921?text=${whatsappMessage}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="px-8 py-4 bg-green-500 text-white rounded-lg font-semibold hover:bg-green-600 transition-colors"
@@ -449,7 +449,7 @@ export default function ConfiguratorSection() {
                   WhatsApp Quote
                 </a>
                 
-                  href="#contact"
+                  <a href="#contact"
                   className="px-8 py-4 border-2 border-gray-900 text-gray-900 rounded-lg font-semibold hover:bg-gray-900 hover:text-white transition-colors"
                 >
                   Get a Detailed Quote
