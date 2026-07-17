@@ -23,7 +23,6 @@ const BED_OPTIONS = [
   { id: 'king', label: 'King', width: 130, price: 35000 },
 ];
 
-const HEIGHT_OPTIONS = [8, 9, 10, 11];
 const HEIGHT_MULTIPLIER = { 8: 1, 9: 1.05, 10: 1.1, 11: 1.15 };
 
 const INSULATION_TYPES = [
@@ -33,37 +32,54 @@ const INSULATION_TYPES = [
   { id: 'both', label: 'Thermal + acoustic' },
 ];
 const INSULATION_TYPE_MULTIPLIER = { none: 0, thermal: 1, acoustic: 1.15, both: 1.9 };
-const INSULATION_THICKNESS = [25, 50, 75, 100];
 const INSULATION_THICKNESS_MULTIPLIER = { 25: 1, 50: 1.6, 75: 2.2, 100: 2.8 };
 
 const BASE_RATE_PER_SQFT = 1200;
 const INSULATION_RATE_PER_SQFT = 150;
 
-function stepValue(value, min, max, delta) {
-  if (value === 0 && delta > 0) return min;
-  const next = value + delta;
-  if (next < min) return 0;
-  if (next > max) return max;
-  return next;
-}
-
 function formatINR(amount) {
   return `₹${Math.round(amount / 1000) * 1000}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+
+function SliderRow({ label, value, min, max, step, display, onChange, leftHint, rightHint }) {
+  return (
+    <div className="mb-5">
+      <p className="text-sm uppercase tracking-widest text-gray-500 font-inter font-semibold mb-2">
+        {label}: <span className="text-gray-900 normal-case tracking-normal">{display}</span>
+      </p>
+      <input
+        type="range"
+        min={min}
+        max={max}
+        step={step}
+        value={value}
+        onChange={onChange}
+        className="w-full accent-gray-900"
+      />
+      {(leftHint || rightHint) && (
+        <div className="flex justify-between text-xs text-gray-400 mt-1">
+          <span>{leftHint}</span>
+          <span>{rightHint}</span>
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default function ConfiguratorSection() {
   const [lengthFt, setLengthFt] = useState(24);
   const [heightFt, setHeightFt] = useState(9);
-  const [kitchen, setKitchen] = useState('compact');
-  const [bed, setBed] = useState('queen');
+  const [kitchenIndex, setKitchenIndex] = useState(1);
+  const [bedIndex, setBedIndex] = useState(2);
   const [officeCapacity, setOfficeCapacity] = useState(0);
   const [diningCapacity, setDiningCapacity] = useState(0);
   const [sofaSeats, setSofaSeats] = useState(2);
-  const [insulationType, setInsulationType] = useState('none');
+  const [insulationTypeIndex, setInsulationTypeIndex] = useState(0);
   const [insulationThickness, setInsulationThickness] = useState(50);
 
-  const kitchenOpt = KITCHEN_OPTIONS.find((o) => o.id === kitchen);
-  const bedOpt = BED_OPTIONS.find((o) => o.id === bed);
+  const kitchenOpt = KITCHEN_OPTIONS[kitchenIndex];
+  const bedOpt = BED_OPTIONS[bedIndex];
+  const insulationType = INSULATION_TYPES[insulationTypeIndex];
 
   const shellWidth = MIN_SHELL_W + ((lengthFt - 10) / (80 - 10)) * (MAX_SHELL_W - MIN_SHELL_W);
   const shellX = (VIEWBOX_W - shellWidth) / 2;
@@ -115,22 +131,22 @@ export default function ConfiguratorSection() {
     if (officeCapacity > 0) total += 8000 + officeCapacity * 3000;
     if (diningCapacity > 0) total += 10000 + diningCapacity * 4000;
     if (sofaSeats > 0) total += 8000 + sofaSeats * 5000;
-    if (insulationType !== 'none') {
+    if (insulationType.id !== 'none') {
       total +=
         floorArea *
         INSULATION_RATE_PER_SQFT *
         INSULATION_THICKNESS_MULTIPLIER[insulationThickness] *
-        INSULATION_TYPE_MULTIPLIER[insulationType];
+        INSULATION_TYPE_MULTIPLIER[insulationType.id];
     }
     return total;
   }, [lengthFt, heightFt, kitchenOpt, bedOpt, officeCapacity, diningCapacity, sofaSeats, insulationType, insulationThickness]);
 
   const furnitureSummary = [
-    kitchen !== 'none' && `${kitchenOpt.label} kitchen`,
+    kitchenOpt.id !== 'none' && `${kitchenOpt.label} kitchen`,
     officeCapacity > 0 && `${officeCapacity}-seat office table`,
     diningCapacity > 0 && `${diningCapacity}-seat dining table`,
     sofaSeats > 0 && `${sofaSeats}-seat sofa`,
-    bed !== 'none' && `${bedOpt.label} bed`,
+    bedOpt.id !== 'none' && `${bedOpt.label} bed`,
   ]
     .filter(Boolean)
     .join(', ');
@@ -138,49 +154,17 @@ export default function ConfiguratorSection() {
   const summaryLine = `${lengthFt} ft x ${heightFt} ft capsule${furnitureSummary ? ` with ${furnitureSummary}` : ''}`;
   const whatsappMessage = encodeURIComponent(`Hi Capsule Culture, I'd like a quote for: ${summaryLine}.`);
 
-  const Stepper = ({ label, value, min, max, unit, onChange }) => (
-    <div className="mb-6">
-      <p className="text-sm uppercase tracking-widest text-gray-500 font-inter font-semibold mb-3">{label}</p>
-      <div className="flex items-center gap-4">
-        <button
-          onClick={() => onChange(stepValue(value, min, max, -1))}
-          className="w-9 h-9 rounded-lg border-2 border-gray-200 text-gray-700 font-bold hover:border-gray-400"
-        >
-          –
-        </button>
-        <span className="text-sm font-semibold text-gray-900 w-24 text-center">
-          {value === 0 ? 'None' : `${value} ${unit}`}
-        </span>
-        <button
-          onClick={() => onChange(stepValue(value, min, max, 1))}
-          className="w-9 h-9 rounded-lg border-2 border-gray-200 text-gray-700 font-bold hover:border-gray-400"
-        >
-          +
-        </button>
-      </div>
-    </div>
-  );
+  const handleDining = (e) => {
+    let v = Number(e.target.value);
+    if (v === 1) v = 2;
+    setDiningCapacity(v);
+  };
 
-  const OptionGroup = ({ label, options, value, onChange }) => (
-    <div className="mb-6">
-      <p className="text-sm uppercase tracking-widest text-gray-500 font-inter font-semibold mb-3">{label}</p>
-      <div className="flex flex-wrap gap-3">
-        {options.map((opt) => (
-          <button
-            key={opt.id}
-            onClick={() => onChange(opt.id)}
-            className={`px-4 py-2 rounded-lg text-sm font-semibold border-2 transition-colors ${
-              value === opt.id
-                ? 'bg-gray-900 border-gray-900 text-white'
-                : 'bg-white border-gray-200 text-gray-700 hover:border-gray-400'
-            }`}
-          >
-            {opt.label}
-          </button>
-        ))}
-      </div>
-    </div>
-  );
+  const handleSofa = (e) => {
+    let v = Number(e.target.value);
+    if (v === 1) v = 2;
+    setSofaSeats(v);
+  };
 
   return (
     <section id="configure" className="py-24 bg-white border-t-2 border-gray-100">
@@ -248,65 +232,107 @@ export default function ConfiguratorSection() {
           </div>
 
           <div>
-            <div className="mb-8">
-              <p className="text-sm uppercase tracking-widest text-gray-500 font-inter font-semibold mb-3">
-                Length: <span className="text-gray-900">{lengthFt} ft</span>
-              </p>
-              <input
-                type="range"
-                min="10"
-                max="80"
-                step="1"
-                value={lengthFt}
-                onChange={(e) => setLengthFt(Number(e.target.value))}
-                className="w-full accent-gray-900"
-              />
-              <div className="flex justify-between text-xs text-gray-400 mt-1">
-                <span>10 ft</span>
-                <span>80 ft</span>
-              </div>
-            </div>
+            <SliderRow
+              label="Length"
+              value={lengthFt}
+              min={10}
+              max={80}
+              step={1}
+              display={`${lengthFt} ft`}
+              onChange={(e) => setLengthFt(Number(e.target.value))}
+              leftHint="10 ft"
+              rightHint="80 ft"
+            />
 
-            <div className="mb-8">
-              <p className="text-sm uppercase tracking-widest text-gray-500 font-inter font-semibold mb-3">
-                Height: <span className="text-gray-900">{heightFt} ft</span>
-              </p>
-              <input
-                type="range"
-                min="8"
-                max="11"
-                step="1"
-                value={heightFt}
-                onChange={(e) => setHeightFt(Number(e.target.value))}
-                className="w-full accent-gray-900"
-              />
-              <div className="flex justify-between text-xs text-gray-400 mt-1">
-                <span>8 ft</span>
-                <span>9 ft</span>
-                <span>10 ft</span>
-                <span>11 ft</span>
-              </div>
-            </div>
+            <SliderRow
+              label="Height"
+              value={heightFt}
+              min={8}
+              max={11}
+              step={1}
+              display={`${heightFt} ft`}
+              onChange={(e) => setHeightFt(Number(e.target.value))}
+              leftHint="8 ft"
+              rightHint="11 ft"
+            />
 
-            <p className="text-xs uppercase tracking-widest text-gray-400 font-inter font-semibold mt-10 mb-4">Furniture</p>
-            <OptionGroup label="Kitchen" options={KITCHEN_OPTIONS} value={kitchen} onChange={setKitchen} />
-            <Stepper label="Office table" value={officeCapacity} min={1} max={10} unit="person" onChange={setOfficeCapacity} />
-            <Stepper label="Dining table" value={diningCapacity} min={2} max={6} unit="person" onChange={setDiningCapacity} />
-            <Stepper label="Sofa" value={sofaSeats} min={2} max={8} unit="seat" onChange={setSofaSeats} />
-            <OptionGroup label="Bed size" options={BED_OPTIONS} value={bed} onChange={setBed} />
+            <p className="text-xs uppercase tracking-widest text-gray-400 font-inter font-semibold mt-8 mb-3">Furniture</p>
 
-            <p className="text-xs uppercase tracking-widest text-gray-400 font-inter font-semibold mt-10 mb-4">Insulation</p>
-            <OptionGroup label="Type" options={INSULATION_TYPES} value={insulationType} onChange={setInsulationType} />
-            {insulationType !== 'none' && (
-              <OptionGroup
+            <SliderRow
+              label="Kitchen"
+              value={kitchenIndex}
+              min={0}
+              max={KITCHEN_OPTIONS.length - 1}
+              step={1}
+              display={kitchenOpt.label}
+              onChange={(e) => setKitchenIndex(Number(e.target.value))}
+            />
+
+            <SliderRow
+              label="Office table"
+              value={officeCapacity}
+              min={0}
+              max={10}
+              step={1}
+              display={officeCapacity === 0 ? 'None' : `${officeCapacity} person`}
+              onChange={(e) => setOfficeCapacity(Number(e.target.value))}
+            />
+
+            <SliderRow
+              label="Dining table"
+              value={diningCapacity}
+              min={0}
+              max={6}
+              step={1}
+              display={diningCapacity === 0 ? 'None' : `${diningCapacity} person`}
+              onChange={handleDining}
+            />
+
+            <SliderRow
+              label="Sofa"
+              value={sofaSeats}
+              min={0}
+              max={8}
+              step={1}
+              display={sofaSeats === 0 ? 'None' : `${sofaSeats} seat`}
+              onChange={handleSofa}
+            />
+
+            <SliderRow
+              label="Bed size"
+              value={bedIndex}
+              min={0}
+              max={BED_OPTIONS.length - 1}
+              step={1}
+              display={bedOpt.label}
+              onChange={(e) => setBedIndex(Number(e.target.value))}
+            />
+
+            <p className="text-xs uppercase tracking-widest text-gray-400 font-inter font-semibold mt-8 mb-3">Insulation</p>
+
+            <SliderRow
+              label="Type"
+              value={insulationTypeIndex}
+              min={0}
+              max={INSULATION_TYPES.length - 1}
+              step={1}
+              display={insulationType.label}
+              onChange={(e) => setInsulationTypeIndex(Number(e.target.value))}
+            />
+
+            {insulationType.id !== 'none' && (
+              <SliderRow
                 label="Thickness"
-                options={INSULATION_THICKNESS.map((t) => ({ id: t, label: `${t} mm` }))}
                 value={insulationThickness}
-                onChange={(v) => setInsulationThickness(Number(v))}
+                min={25}
+                max={100}
+                step={25}
+                display={`${insulationThickness} mm`}
+                onChange={(e) => setInsulationThickness(Number(e.target.value))}
               />
             )}
 
-            <div className="mt-10 pt-8 border-t border-gray-200">
+            <div className="mt-8 pt-6 border-t border-gray-200">
               <p className="text-gray-700 font-light mb-6">{summaryLine}.</p>
               <div className="flex flex-wrap gap-4">
                 <a
