@@ -42,6 +42,7 @@ const lenis = new Lenis({
       <HeroSection />
       <AboutSection />
       <ModelsSection />
+      <ConfiguratorSection />
       <FeaturesSection />
       <GallerySection />
       <ProcessSection />
