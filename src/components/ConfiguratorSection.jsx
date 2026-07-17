@@ -1,88 +1,175 @@
 import React, { useState, useMemo } from 'react';
 
-const KITCHEN_OPTIONS = [
-  { id: 'none', label: 'None', width: 0 },
-  { id: 'compact', label: 'Compact', width: 70 },
-  { id: 'full', label: 'Full kitchen', width: 110 },
-];
+const VIEWBOX_W = 600;
+const VIEWBOX_H = 300;
+const SHELL_Y = 80;
+const SHELL_H = 130;
+const MIN_SHELL_W = 220;
+const MAX_SHELL_W = 480;
+const ZONE_H = 64;
+const GAP = 14;
+const PADDING = 22;
 
-const SOFA_OPTIONS = [
-  { id: 'none', label: 'None', width: 0 },
-  { id: 'single', label: 'Single sofa', width: 80 },
-  { id: 'lshaped', label: 'L-shaped sofa', width: 130 },
+const KITCHEN_OPTIONS = [
+  { id: 'none', label: 'None', width: 0, price: 0 },
+  { id: 'compact', label: 'Compact', width: 70, price: 25000 },
+  { id: 'full', label: 'Full kitchen', width: 110, price: 60000 },
 ];
 
 const BED_OPTIONS = [
-  { id: 'none', label: 'None', width: 0 },
-  { id: 'single', label: 'Single', width: 70 },
-  { id: 'queen', label: 'Queen', width: 100 },
-  { id: 'king', label: 'King', width: 130 },
+  { id: 'none', label: 'None', width: 0, price: 0 },
+  { id: 'single', label: 'Single', width: 70, price: 15000 },
+  { id: 'queen', label: 'Queen', width: 100, price: 25000 },
+  { id: 'king', label: 'King', width: 130, price: 35000 },
 ];
 
-const GAP = 16;
-const PADDING = 30;
-const SHELL_HEIGHT = 160;
-const MARGIN = 40;
+const HEIGHT_OPTIONS = [8, 9, 10, 11];
+const HEIGHT_MULTIPLIER = { 8: 1, 9: 1.05, 10: 1.1, 11: 1.15 };
+
+const INSULATION_TYPES = [
+  { id: 'none', label: 'None' },
+  { id: 'thermal', label: 'Thermal' },
+  { id: 'acoustic', label: 'Acoustic' },
+  { id: 'both', label: 'Thermal + acoustic' },
+];
+const INSULATION_TYPE_MULTIPLIER = { none: 0, thermal: 1, acoustic: 1.15, both: 1.9 };
+const INSULATION_THICKNESS = [25, 50, 75, 100];
+const INSULATION_THICKNESS_MULTIPLIER = { 25: 1, 50: 1.6, 75: 2.2, 100: 2.8 };
+
+const BASE_RATE_PER_SQFT = 1200;
+const INSULATION_RATE_PER_SQFT = 150;
+
+function stepValue(value, min, max, delta) {
+  if (value === 0 && delta > 0) return min;
+  const next = value + delta;
+  if (next < min) return 0;
+  if (next > max) return max;
+  return next;
+}
+
+function formatINR(amount) {
+  return `₹${Math.round(amount / 1000) * 1000}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
 
 export default function ConfiguratorSection() {
-  const [lengthFt, setLengthFt] = useState(20);
+  const [lengthFt, setLengthFt] = useState(24);
+  const [heightFt, setHeightFt] = useState(9);
   const [kitchen, setKitchen] = useState('compact');
-  const [sofa, setSofa] = useState('single');
   const [bed, setBed] = useState('queen');
+  const [officeCapacity, setOfficeCapacity] = useState(0);
+  const [diningCapacity, setDiningCapacity] = useState(0);
+  const [sofaSeats, setSofaSeats] = useState(2);
+  const [insulationType, setInsulationType] = useState('none');
+  const [insulationThickness, setInsulationThickness] = useState(50);
 
   const kitchenOpt = KITCHEN_OPTIONS.find((o) => o.id === kitchen);
-  const sofaOpt = SOFA_OPTIONS.find((o) => o.id === sofa);
   const bedOpt = BED_OPTIONS.find((o) => o.id === bed);
 
+  const shellWidth = MIN_SHELL_W + ((lengthFt - 10) / (80 - 10)) * (MAX_SHELL_W - MIN_SHELL_W);
+  const shellX = (VIEWBOX_W - shellWidth) / 2;
+
   const layout = useMemo(() => {
-    const zones = [
+    const rawZones = [
       kitchenOpt.id !== 'none' && { label: 'Kitchen', width: kitchenOpt.width, kind: 'kitchen' },
-      sofaOpt.id !== 'none' && { label: 'Sofa', width: sofaOpt.width, kind: 'sofa' },
+      officeCapacity > 0 && { label: `Office (${officeCapacity})`, width: 40 + officeCapacity * 12, kind: 'office' },
+      diningCapacity > 0 && { label: `Dining (${diningCapacity})`, width: 50 + diningCapacity * 15, kind: 'dining' },
+      sofaSeats > 0 && { label: `Sofa (${sofaSeats})`, width: 40 + sofaSeats * 14, kind: 'sofa' },
       bedOpt.id !== 'none' && { label: 'Bed', width: bedOpt.width, kind: 'bed' },
     ].filter(Boolean);
 
-    const zonesWidth = zones.reduce((sum, z) => sum + z.width, 0) + GAP * Math.max(zones.length - 1, 0);
-    const requiredWidth = zonesWidth + PADDING * 2;
-    const lengthWidth = 260 + ((lengthFt - 12) / (32 - 12)) * 200;
-    const shellWidth = Math.max(lengthWidth, requiredWidth);
+    const rawTotal = rawZones.reduce((sum, z) => sum + z.width, 0);
+    const available = shellWidth - PADDING * 2;
+    const rawGapTotal = GAP * Math.max(rawZones.length - 1, 0);
 
-    let cursorX = MARGIN + (shellWidth - zonesWidth) / 2;
-    const positioned = zones.map((z) => {
+    let scale = 1;
+    if (rawTotal + rawGapTotal > available && rawTotal > 0) {
+      scale = Math.max((available - rawGapTotal) / rawTotal, 0.35);
+    }
+
+    const scaledZones = rawZones.map((z) => ({ ...z, width: Math.max(z.width * scale, 26) }));
+    const scaledTotal = scaledZones.reduce((sum, z) => sum + z.width, 0) + GAP * Math.max(scaledZones.length - 1, 0);
+
+    let cursorX = shellX + (shellWidth - scaledTotal) / 2;
+    const positioned = scaledZones.map((z) => {
       const x = cursorX;
       cursorX += z.width + GAP;
       return { ...z, x };
     });
 
-    return {
-      shellWidth,
-      shellX: MARGIN,
-      shellY: MARGIN,
-      viewBoxWidth: shellWidth + MARGIN * 2,
-      viewBoxHeight: SHELL_HEIGHT + MARGIN * 2,
-      zones: positioned,
-    };
-  }, [lengthFt, kitchenOpt, sofaOpt, bedOpt]);
+    return { zones: positioned };
+  }, [shellWidth, shellX, kitchenOpt, bedOpt, officeCapacity, diningCapacity, sofaSeats]);
 
   const kindStyles = {
     kitchen: { fill: '#E1F5EE', stroke: '#0F6E56', text: '#085041' },
-    sofa: { fill: '#F1EFE8', stroke: '#5F5E5A', text: '#2C2C2A' },
+    office: { fill: '#FAEEDA', stroke: '#854F0B', text: '#633806' },
+    dining: { fill: '#F1EFE8', stroke: '#5F5E5A', text: '#2C2C2A' },
+    sofa: { fill: '#FBEAF0', stroke: '#993556', text: '#72243E' },
     bed: { fill: '#E6F1FB', stroke: '#185FA5', text: '#0C447C' },
   };
 
-  const summaryLine = `${lengthFt} ft capsule — ${kitchenOpt.label} kitchen, ${sofaOpt.label.toLowerCase()}, ${bedOpt.label.toLowerCase()} bed`;
-  const whatsappMessage = encodeURIComponent(
-    `Hi Capsule Culture, I'd like a quote for: ${summaryLine}.`
+  const price = useMemo(() => {
+    const floorArea = lengthFt * 10;
+    let total = floorArea * BASE_RATE_PER_SQFT * HEIGHT_MULTIPLIER[heightFt];
+    total += kitchenOpt.price;
+    total += bedOpt.price;
+    if (officeCapacity > 0) total += 8000 + officeCapacity * 3000;
+    if (diningCapacity > 0) total += 10000 + diningCapacity * 4000;
+    if (sofaSeats > 0) total += 8000 + sofaSeats * 5000;
+    if (insulationType !== 'none') {
+      total +=
+        floorArea *
+        INSULATION_RATE_PER_SQFT *
+        INSULATION_THICKNESS_MULTIPLIER[insulationThickness] *
+        INSULATION_TYPE_MULTIPLIER[insulationType];
+    }
+    return total;
+  }, [lengthFt, heightFt, kitchenOpt, bedOpt, officeCapacity, diningCapacity, sofaSeats, insulationType, insulationThickness]);
+
+  const furnitureSummary = [
+    kitchen !== 'none' && `${kitchenOpt.label} kitchen`,
+    officeCapacity > 0 && `${officeCapacity}-seat office table`,
+    diningCapacity > 0 && `${diningCapacity}-seat dining table`,
+    sofaSeats > 0 && `${sofaSeats}-seat sofa`,
+    bed !== 'none' && `${bedOpt.label} bed`,
+  ]
+    .filter(Boolean)
+    .join(', ');
+
+  const summaryLine = `${lengthFt} ft x ${heightFt} ft capsule${furnitureSummary ? ` with ${furnitureSummary}` : ''}`;
+  const whatsappMessage = encodeURIComponent(`Hi Capsule Culture, I'd like a quote for: ${summaryLine}.`);
+
+  const Stepper = ({ label, value, min, max, unit, onChange }) => (
+    <div className="mb-6">
+      <p className="text-sm uppercase tracking-widest text-gray-500 font-inter font-semibold mb-3">{label}</p>
+      <div className="flex items-center gap-4">
+        <button
+          onClick={() => onChange(stepValue(value, min, max, -1))}
+          className="w-9 h-9 rounded-lg border-2 border-gray-200 text-gray-700 font-bold hover:border-gray-400"
+        >
+          –
+        </button>
+        <span className="text-sm font-semibold text-gray-900 w-24 text-center">
+          {value === 0 ? 'None' : `${value} ${unit}`}
+        </span>
+        <button
+          onClick={() => onChange(stepValue(value, min, max, 1))}
+          className="w-9 h-9 rounded-lg border-2 border-gray-200 text-gray-700 font-bold hover:border-gray-400"
+        >
+          +
+        </button>
+      </div>
+    </div>
   );
 
   const OptionGroup = ({ label, options, value, onChange }) => (
-    <div className="mb-8">
+    <div className="mb-6">
       <p className="text-sm uppercase tracking-widest text-gray-500 font-inter font-semibold mb-3">{label}</p>
       <div className="flex flex-wrap gap-3">
         {options.map((opt) => (
           <button
             key={opt.id}
             onClick={() => onChange(opt.id)}
-            className={`px-5 py-2 rounded-lg text-sm font-semibold border-2 transition-colors ${
+            className={`px-4 py-2 rounded-lg text-sm font-semibold border-2 transition-colors ${
               value === opt.id
                 ? 'bg-gray-900 border-gray-900 text-white'
                 : 'bg-white border-gray-200 text-gray-700 hover:border-gray-400'
@@ -98,72 +185,126 @@ export default function ConfiguratorSection() {
   return (
     <section id="configure" className="py-24 bg-white border-t-2 border-gray-100">
       <div className="max-w-7xl mx-auto px-6 sm:px-8">
-        <div className="mb-14">
-          <p className="text-sm uppercase tracking-widest text-gray-500 font-inter font-semibold mb-4">Build Your Own</p>
-          <h2 className="font-poppins text-5xl md:text-6xl font-bold text-gray-900 leading-tight">
-            Configure your capsule.
+        <div className="mb-10">
+          <p className="text-xs uppercase tracking-widest text-gray-500 font-inter font-semibold mb-2">Build Your Own</p>
+          <h2 className="font-poppins text-3xl md:text-4xl font-bold text-gray-900 leading-tight">
+            Configure your capsule
           </h2>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
           <div className="bg-gray-50 rounded-2xl p-6 sm:p-8 sticky top-24">
-            <svg width="100%" viewBox={`0 0 ${layout.viewBoxWidth} ${layout.viewBoxHeight}`} role="img">
+            <svg width="100%" viewBox={`0 0 ${VIEWBOX_W} ${VIEWBOX_H}`} role="img">
               <title>Capsule floor plan preview</title>
               <desc>Top-down layout of the capsule that updates as you change options</desc>
+
               <rect
-                x={layout.shellX}
-                y={layout.shellY}
-                width={layout.shellWidth}
-                height={SHELL_HEIGHT}
-                rx={SHELL_HEIGHT / 2}
+                x={shellX}
+                y={SHELL_Y}
+                width={shellWidth}
+                height={SHELL_H}
+                rx={SHELL_H / 2}
                 fill="#FFFFFF"
                 stroke="#1f2937"
                 strokeWidth="1.5"
               />
+
+              <rect x={shellX + shellWidth - 66} y={SHELL_Y - 26} width="66" height="20" rx="4" fill="#1f2937" />
+              <text x={shellX + shellWidth - 33} y={SHELL_Y - 12} textAnchor="middle" fontSize="11" fill="#ffffff" fontWeight="600">
+                H: {heightFt} ft
+              </text>
+
               {layout.zones.length === 0 && (
-                <text x={layout.viewBoxWidth / 2} y={layout.viewBoxHeight / 2} textAnchor="middle" fontSize="13" fill="#9ca3af">
-                  Open floor plan — pick options below
+                <text x={VIEWBOX_W / 2} y={SHELL_Y + SHELL_H / 2} textAnchor="middle" fontSize="13" fill="#9ca3af">
+                  Open floor plan
                 </text>
               )}
               {layout.zones.map((z) => {
                 const style = kindStyles[z.kind];
-                const zoneY = layout.shellY + (SHELL_HEIGHT - 70) / 2;
+                const zoneY = SHELL_Y + (SHELL_H - ZONE_H) / 2;
                 return (
                   <g key={z.kind}>
-                    <rect x={z.x} y={zoneY} width={z.width} height="70" rx="8" fill={style.fill} stroke={style.stroke} strokeWidth="1" />
-                    <text x={z.x + z.width / 2} y={zoneY + 40} textAnchor="middle" fontSize="12" fill={style.text} fontWeight="600">
+                    <rect x={z.x} y={zoneY} width={z.width} height={ZONE_H} rx="8" fill={style.fill} stroke={style.stroke} strokeWidth="1" />
+                    <text x={z.x + z.width / 2} y={zoneY + ZONE_H / 2 + 4} textAnchor="middle" fontSize="11" fill={style.text} fontWeight="600">
                       {z.label}
                     </text>
                   </g>
                 );
               })}
+
+              <line x1={shellX} y1={SHELL_Y + SHELL_H + 30} x2={shellX + shellWidth} y2={SHELL_Y + SHELL_H + 30} stroke="#9ca3af" strokeWidth="1" />
+              <line x1={shellX} y1={SHELL_Y + SHELL_H + 24} x2={shellX} y2={SHELL_Y + SHELL_H + 36} stroke="#9ca3af" strokeWidth="1" />
+              <line x1={shellX + shellWidth} y1={SHELL_Y + SHELL_H + 24} x2={shellX + shellWidth} y2={SHELL_Y + SHELL_H + 36} stroke="#9ca3af" strokeWidth="1" />
+              <text x={shellX + shellWidth / 2} y={SHELL_Y + SHELL_H + 52} textAnchor="middle" fontSize="12" fill="#6b7280" fontWeight="600">
+                {lengthFt} ft
+              </text>
             </svg>
-            <p className="text-center text-sm text-gray-500 mt-4 font-light">{lengthFt} ft × 10 ft capsule (schematic — actual photos coming soon)</p>
+
+            <div className="mt-6 pt-6 border-t border-gray-200">
+              <p className="text-xs uppercase tracking-widest text-gray-500 font-semibold mb-1">Estimated price</p>
+              <p className="text-3xl font-bold text-gray-900">{formatINR(price)}</p>
+              <p className="text-xs text-gray-400 mt-1 font-light">Illustrative estimate only — confirm final pricing with our team.</p>
+            </div>
           </div>
 
           <div>
-            <div className="mb-10">
+            <div className="mb-8">
               <p className="text-sm uppercase tracking-widest text-gray-500 font-inter font-semibold mb-3">
                 Length: <span className="text-gray-900">{lengthFt} ft</span>
               </p>
               <input
                 type="range"
-                min="12"
-                max="32"
+                min="10"
+                max="80"
                 step="1"
                 value={lengthFt}
                 onChange={(e) => setLengthFt(Number(e.target.value))}
                 className="w-full accent-gray-900"
               />
               <div className="flex justify-between text-xs text-gray-400 mt-1">
-                <span>12 ft</span>
-                <span>32 ft</span>
+                <span>10 ft</span>
+                <span>80 ft</span>
               </div>
             </div>
 
+            <div className="mb-8">
+              <p className="text-sm uppercase tracking-widest text-gray-500 font-inter font-semibold mb-3">
+                Height: <span className="text-gray-900">{heightFt} ft</span>
+              </p>
+              <input
+                type="range"
+                min="8"
+                max="11"
+                step="1"
+                value={heightFt}
+                onChange={(e) => setHeightFt(Number(e.target.value))}
+                className="w-full accent-gray-900"
+              />
+              <div className="flex justify-between text-xs text-gray-400 mt-1">
+                <span>8 ft</span>
+                <span>9 ft</span>
+                <span>10 ft</span>
+                <span>11 ft</span>
+              </div>
+            </div>
+
+            <p className="text-xs uppercase tracking-widest text-gray-400 font-inter font-semibold mt-10 mb-4">Furniture</p>
             <OptionGroup label="Kitchen" options={KITCHEN_OPTIONS} value={kitchen} onChange={setKitchen} />
-            <OptionGroup label="Sofa" options={SOFA_OPTIONS} value={sofa} onChange={setSofa} />
+            <Stepper label="Office table" value={officeCapacity} min={1} max={10} unit="person" onChange={setOfficeCapacity} />
+            <Stepper label="Dining table" value={diningCapacity} min={2} max={6} unit="person" onChange={setDiningCapacity} />
+            <Stepper label="Sofa" value={sofaSeats} min={2} max={8} unit="seat" onChange={setSofaSeats} />
             <OptionGroup label="Bed size" options={BED_OPTIONS} value={bed} onChange={setBed} />
+
+            <p className="text-xs uppercase tracking-widest text-gray-400 font-inter font-semibold mt-10 mb-4">Insulation</p>
+            <OptionGroup label="Type" options={INSULATION_TYPES} value={insulationType} onChange={setInsulationType} />
+            {insulationType !== 'none' && (
+              <OptionGroup
+                label="Thickness"
+                options={INSULATION_THICKNESS.map((t) => ({ id: t, label: `${t} mm` }))}
+                value={insulationThickness}
+                onChange={(v) => setInsulationThickness(Number(v))}
+              />
+            )}
 
             <div className="mt-10 pt-8 border-t border-gray-200">
               <p className="text-gray-700 font-light mb-6">{summaryLine}.</p>
