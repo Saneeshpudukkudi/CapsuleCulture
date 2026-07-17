@@ -3,9 +3,10 @@ import React, { useState } from 'react';
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const navLinks = [
+const navLinks = [
     { href: '#about', label: 'About' },
     { href: '#models', label: 'Models' },
+    { href: '#configure', label: 'Configure' },
     { href: '#features', label: 'Features' },
     { href: '#gallery', label: 'Gallery' },
     { href: '#contact', label: 'Contact' },
