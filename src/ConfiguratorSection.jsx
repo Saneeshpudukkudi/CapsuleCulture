@@ -1,1 +1,1 @@
-
+<ConfiguratorSection />
