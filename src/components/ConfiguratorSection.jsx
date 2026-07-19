@@ -1,76 +1,104 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 
 const VIEWBOX_W = 600;
 const VIEWBOX_H = 300;
 const SHELL_Y = 90;
 const SHELL_H = 120;
-const MIN_SHELL_W = 200;
-const MAX_SHELL_W = 460;
-const ZONE_H = 56;
-const GAP = 14;
-const PADDING = 20;
+const MIN_SHELL_W = 220;
+const MAX_SHELL_W = 480;
 
 const MODELS = [
-  { id: 'studio', label: 'Studio', defaults: { width: 10, length: 16, height: 8, kitchen: 'compact', bedroom: 'none', deck: 'none' } },
-  { id: 'office', label: 'Office', defaults: { width: 10, length: 20, height: 9, kitchen: 'none', bedroom: 'none', deck: '4ft' } },
-  { id: 'resort', label: 'Resort', defaults: { width: 12, length: 24, height: 9, kitchen: 'standard', bedroom: 'queen', deck: 'wrap' } },
-  { id: 'family', label: 'Family', defaults: { width: 14, length: 30, height: 9, kitchen: 'premium', bedroom: 'king', deck: '6ft' } },
-  { id: 'cafe', label: 'Cafe', defaults: { width: 12, length: 20, height: 9, kitchen: 'luxury', bedroom: 'none', deck: 'wrap' } },
-];
-
-const WIDTH_OPTIONS = [10, 12, 14];
-const LENGTH_OPTIONS = [14, 16, 20, 24, 30, 40];
-
-const EXTERIOR_STYLES = [
-  { id: 'modern', label: 'Modern' },
-  { id: 'minimal', label: 'Minimal' },
-  { id: 'wood', label: 'Wood-clad' },
-  { id: 'industrial', label: 'Industrial' },
+  {
+    id: 'studio',
+    label: 'Studio',
+    basePrice: 900000,
+    baseSqft: 140,
+    sizes: ['10x14', '12x16'],
+    furniture: ['Sofa', 'Foldable table', 'Wardrobe', 'Queen Size Bed'],
+    shellRx: 55,
+  },
+  {
+    id: 'office',
+    label: 'Office',
+    basePrice: 1100000,
+    baseSqft: 192,
+    sizes: ['12x16', '14x18', '16x20', '18x22', '20x24'],
+    furniture: ['Sofa', 'Dining Table', 'Foldable table', 'Wardrobe', 'King Size Bed', 'Queen Size Bed'],
+    shellRx: 18,
+  },
+  {
+    id: 'resort',
+    label: 'Resort',
+    basePrice: 1000000,
+    baseSqft: 140,
+    sizes: ['10x14', '12x16', '14x18'],
+    furniture: ['Sofa', 'Foldable table', 'Wardrobe', 'King Size Bed', 'Queen Size Bed'],
+    shellRx: 60,
+  },
+  {
+    id: 'cafe',
+    label: 'Cafe',
+    basePrice: 1050000,
+    baseSqft: 192,
+    sizes: ['12x16', '14x18', '16x20', '18x22', '20x24'],
+    furniture: ['Sofa', 'Dining Table', 'Foldable table', 'Office table'],
+    shellRx: 30,
+  },
 ];
 
 const COLORS = [
-  { id: 'white', label: 'White', hex: '#F5F5F0', price: 0 },
-  { id: 'black', label: 'Black', hex: '#1F2023', price: 10000 },
-  { id: 'grey', label: 'Grey', hex: '#9CA3AF', price: 10000 },
-  { id: 'olive', label: 'Olive', hex: '#6B7A4A', price: 20000 },
-  { id: 'wood', label: 'Wood', hex: '#9C6B3F', price: 30000 },
-  { id: 'navy', label: 'Navy', hex: '#1E3A5F', price: 20000 },
-  { id: 'sand', label: 'Sand', hex: '#D9C6A5', price: 15000 },
+  { id: 'grey', label: 'Grey', hex: '#9CA3AF' },
+  { id: 'black', label: 'Black', hex: '#1F2023' },
+  { id: 'white', label: 'White', hex: '#F5F5F0' },
+  { id: 'charcoal', label: 'Charcoal', hex: '#36454F' },
 ];
 
 const DECKS = [
-  { id: 'none', label: 'None', price: 0 },
-  { id: '4ft', label: '4 ft deck', price: 50000 },
-  { id: '6ft', label: '6 ft deck', price: 100000 },
-  { id: 'wrap', label: 'Wrap-around', price: 200000 },
+  { id: 'none', label: 'No Deck', price: 0 },
+  { id: 'deck', label: 'Deck', price: 50000 },
 ];
 
-const KITCHENS = [
-  { id: 'none', label: 'None', price: 0 },
-  { id: 'compact', label: 'Compact', price: 75000 },
-  { id: 'standard', label: 'Standard', price: 150000 },
-  { id: 'premium', label: 'Premium', price: 250000 },
-  { id: 'luxury', label: 'Luxury Island', price: 350000 },
+const LEG_HEIGHTS = [1, 2, 3, 4, 5];
+const LEG_HEIGHT_RATE = 15000;
+
+const INTERIOR_FINISHES = [
+  { id: 'tile', label: 'Tile', price: 0 },
+  { id: 'wood', label: 'Wooden Cladding', price: 40000 },
 ];
 
-const BEDROOMS = [
-  { id: 'none', label: 'No bedroom', price: 0 },
-  { id: 'single', label: 'Single', price: 40000 },
-  { id: 'queen', label: 'Queen', price: 70000 },
-  { id: 'king', label: 'King', price: 100000 },
-  { id: 'bunk', label: 'Bunk bed', price: 120000 },
+const FURNITURE_PRICES = {
+  Sofa: 25000,
+  'Dining Table': 30000,
+  'Foldable table': 10000,
+  Wardrobe: 20000,
+  'Office table': 25000,
+  'Queen Size Bed': 35000,
+  'King Size Bed': 45000,
+};
+
+const APPLIANCES = [
+  { id: 'TV', price: 15000 },
+  { id: 'Fridge', price: 20000 },
+  { id: 'CCTV', price: 12000 },
+  { id: 'Smart curtain', price: 18000 },
 ];
 
-const BASE_PRICE = 1050000;
-const BASE_WIDTH = 10;
-const BASE_LENGTH = 14;
-const BASE_HEIGHT = 8;
-const PRICE_PER_EXTRA_LENGTH_2FT = 75000;
-const PRICE_PER_EXTRA_WIDTH_2FT = 90000;
-const PRICE_PER_HEIGHT_FT = 30000;
+const RATE_PER_EXTRA_SQFT = 1500;
+
+const STEP_ORDER = ['model', 'size', 'color', 'deck', 'legHeight', 'interiorFinish', 'furniture', 'appliances'];
+
+function nextStepAfter(id) {
+  const idx = STEP_ORDER.indexOf(id);
+  return idx >= 0 && idx < STEP_ORDER.length - 1 ? STEP_ORDER[idx + 1] : null;
+}
 
 function formatINR(amount) {
   return `₹${Math.round(amount / 1000) * 1000}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+
+function parseSize(sizeStr) {
+  const [w, l] = sizeStr.split('x').map(Number);
+  return { width: w, length: l, sqft: w * l };
 }
 
 function PickerGrid({ options, value, onChange, columns = 3 }) {
@@ -81,7 +109,7 @@ function PickerGrid({ options, value, onChange, columns = 3 }) {
         <button
           key={opt.id}
           onClick={() => onChange(opt.id)}
-          className={`px-4 py-4 rounded-xl text-sm font-semibold border-2 transition-colors text-left ${
+          className={`px-4 py-3 rounded-xl text-sm font-semibold border-2 transition-colors text-left ${
             value === opt.id ? 'bg-gray-900 border-gray-900 text-white' : 'bg-white border-gray-200 text-gray-700 hover:border-gray-400'
           }`}
         >
@@ -97,117 +125,114 @@ function PickerGrid({ options, value, onChange, columns = 3 }) {
   );
 }
 
-const STEP_ORDER = ['model', 'size', 'style', 'color', 'deck', 'interior'];
-
-function nextStepAfter(id) {
-  const idx = STEP_ORDER.indexOf(id);
-  return idx >= 0 && idx < STEP_ORDER.length - 1 ? STEP_ORDER[idx + 1] : null;
+function MultiSelectGrid({ items, selected, onToggle, priceMap }) {
+  return (
+    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+      {items.map((item) => {
+        const isOn = selected.includes(item);
+        const price = priceMap[item] || 0;
+        return (
+          <button
+            key={item}
+            onClick={() => onToggle(item)}
+            className={`px-4 py-3 rounded-xl text-sm font-semibold border-2 transition-colors text-left ${
+              isOn ? 'bg-gray-900 border-gray-900 text-white' : 'bg-white border-gray-200 text-gray-700 hover:border-gray-400'
+            }`}
+          >
+            {item}
+            {price > 0 && (
+              <span className={`block text-xs mt-1 font-normal ${isOn ? 'text-gray-300' : 'text-gray-400'}`}>+{formatINR(price)}</span>
+            )}
+          </button>
+        );
+      })}
+    </div>
+  );
 }
 
 export default function ConfiguratorSection() {
   const [openStep, setOpenStep] = useState('model');
   const [modelId, setModelId] = useState('studio');
-  const [width, setWidth] = useState(10);
-  const [length, setLength] = useState(16);
-  const [height, setHeight] = useState(8);
-  const [styleId, setStyleId] = useState('modern');
-  const [colorId, setColorId] = useState('white');
+  const [sizeStr, setSizeStr] = useState('10x14');
+  const [colorId, setColorId] = useState('grey');
   const [deckId, setDeckId] = useState('none');
-  const [kitchenId, setKitchenId] = useState('compact');
-  const [bedroomId, setBedroomId] = useState('none');
+  const [legHeight, setLegHeight] = useState(1);
+  const [interiorFinishId, setInteriorFinishId] = useState('tile');
+  const [furniture, setFurniture] = useState([]);
+  const [appliances, setAppliances] = useState([]);
 
   const model = MODELS.find((m) => m.id === modelId);
   const colorOpt = COLORS.find((c) => c.id === colorId);
   const deckOpt = DECKS.find((d) => d.id === deckId);
-  const kitchenOpt = KITCHENS.find((k) => k.id === kitchenId);
-  const bedroomOpt = BEDROOMS.find((b) => b.id === bedroomId);
-  const styleOpt = EXTERIOR_STYLES.find((s) => s.id === styleId);
+  const finishOpt = INTERIOR_FINISHES.find((f) => f.id === interiorFinishId);
+  const size = parseSize(sizeStr);
 
   const applyModel = (id) => {
+    const newModel = MODELS.find((m) => m.id === id);
     setModelId(id);
-    const d = MODELS.find((m) => m.id === id).defaults;
-    setWidth(d.width);
-    setLength(d.length);
-    setHeight(d.height);
-    setKitchenId(d.kitchen);
-    setBedroomId(d.bedroom);
-    setDeckId(d.deck);
+    setSizeStr(newModel.sizes[0]);
+    setFurniture([]);
     setOpenStep(nextStepAfter('model'));
   };
 
-  const chooseStyle = (id) => {
-    setStyleId(id);
-    setOpenStep(nextStepAfter('style'));
+  useEffect(() => {
+    if (!model.sizes.includes(sizeStr)) setSizeStr(model.sizes[0]);
+  }, [modelId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const toggleFurniture = (item) => {
+    setFurniture((prev) => (prev.includes(item) ? prev.filter((f) => f !== item) : [...prev, item]));
   };
 
-  const chooseColor = (id) => {
-    setColorId(id);
-    setOpenStep(nextStepAfter('color'));
+  const toggleAppliance = (id) => {
+    setAppliances((prev) => (prev.includes(id) ? prev.filter((a) => a !== id) : [...prev, id]));
   };
-
-  const chooseDeck = (id) => {
-    setDeckId(id);
-    setOpenStep(nextStepAfter('deck'));
-  };
-
-  const sqft = width * length;
 
   const price = useMemo(() => {
-    const extraWidthUnits = Math.max((width - BASE_WIDTH) / 2, 0);
-    const extraLengthUnits = Math.max((length - BASE_LENGTH) / 2, 0);
-    const extraHeight = Math.max(height - BASE_HEIGHT, 0);
+    const extraSqft = Math.max(size.sqft - model.baseSqft, 0);
+    const furniturePrice = furniture.reduce((sum, f) => sum + (FURNITURE_PRICES[f] || 0), 0);
+    const appliancePrice = appliances.reduce((sum, a) => {
+      const found = APPLIANCES.find((x) => x.id === a);
+      return sum + (found ? found.price : 0);
+    }, 0);
     return (
-      BASE_PRICE +
-      extraWidthUnits * PRICE_PER_EXTRA_WIDTH_2FT +
-      extraLengthUnits * PRICE_PER_EXTRA_LENGTH_2FT +
-      extraHeight * PRICE_PER_HEIGHT_FT +
-      colorOpt.price +
+      model.basePrice +
+      extraSqft * RATE_PER_EXTRA_SQFT +
       deckOpt.price +
-      kitchenOpt.price +
-      bedroomOpt.price
+      (legHeight - 1) * LEG_HEIGHT_RATE +
+      finishOpt.price +
+      furniturePrice +
+      appliancePrice
     );
-  }, [width, length, height, colorOpt, deckOpt, kitchenOpt, bedroomOpt]);
+  }, [model, size, deckOpt, legHeight, finishOpt, furniture, appliances]);
 
-  const shellWidth = MIN_SHELL_W + ((length - 14) / (40 - 14)) * (MAX_SHELL_W - MIN_SHELL_W);
+  const shellWidth = MIN_SHELL_W + ((size.length - 10) / (24 - 10)) * (MAX_SHELL_W - MIN_SHELL_W);
   const shellX = (VIEWBOX_W - shellWidth) / 2;
-  const shellRx = styleId === 'modern' ? SHELL_H / 2 : styleId === 'minimal' ? 20 : styleId === 'industrial' ? 8 : 18;
-  const shellStrokeWidth = styleId === 'industrial' ? 3 : 1.5;
+  const legPixelHeight = 8 + legHeight * 6;
 
-  const layout = useMemo(() => {
-    const rawZones = [
-      kitchenOpt.id !== 'none' && { label: `Kitchen (${kitchenOpt.label})`, width: 110, kind: 'kitchen' },
-      bedroomOpt.id !== 'none' && { label: `Bed (${bedroomOpt.label})`, width: 110, kind: 'bed' },
-    ].filter(Boolean);
+  const summaryChips = [
+    `${model.label}`,
+    `${sizeStr} ft`,
+    `${colorOpt.label}`,
+    deckOpt.label,
+    `${legHeight} ft legs`,
+    finishOpt.label,
+    ...furniture,
+    ...appliances,
+  ];
 
-    const rawTotal = rawZones.reduce((sum, z) => sum + z.width, 0);
-    const available = shellWidth - PADDING * 2;
-    const rawGapTotal = GAP * Math.max(rawZones.length - 1, 0);
-
-    let scale = 1;
-    if (rawTotal + rawGapTotal > available && rawTotal > 0) {
-      scale = Math.max((available - rawGapTotal) / rawTotal, 0.4);
-    }
-
-    const scaledZones = rawZones.map((z) => ({ ...z, width: Math.max(z.width * scale, 60) }));
-    const scaledTotal = scaledZones.reduce((sum, z) => sum + z.width, 0) + GAP * Math.max(scaledZones.length - 1, 0);
-
-    let cursorX = shellX + (shellWidth - scaledTotal) / 2;
-    const positioned = scaledZones.map((z) => {
-      const x = cursorX;
-      cursorX += z.width + GAP;
-      return { ...z, x };
-    });
-
-    return { zones: positioned };
-  }, [shellWidth, shellX, kitchenOpt, bedroomOpt]);
-
-  const kindStyles = {
-    kitchen: { fill: '#E1F5EE', stroke: '#0F6E56', text: '#085041' },
-    bed: { fill: '#E6F1FB', stroke: '#185FA5', text: '#0C447C' },
-  };
-
-  const summaryLine = `${model.label} model — ${width} x ${length} ft (${sqft} sqft), ${height} ft height, ${styleOpt.label} style, ${colorOpt.label} exterior, ${deckOpt.label} deck, ${kitchenOpt.label} kitchen, ${bedroomOpt.label}`;
+  const summaryLine = summaryChips.join(', ');
   const whatsappMessage = encodeURIComponent(`Hi Capsule Culture, I'd like a quote for: ${summaryLine}. Estimated price: ${formatINR(price)}.`);
+
+  const steps = [
+    { id: 'model', title: 'Model', summary: model.label },
+    { id: 'size', title: 'Size', summary: `${sizeStr} ft (${size.sqft} sqft)` },
+    { id: 'color', title: 'Color', summary: colorOpt.label },
+    { id: 'deck', title: 'Deck', summary: deckOpt.label },
+    { id: 'legHeight', title: 'Foundation Leg Height', summary: `${legHeight} ft` },
+    { id: 'interiorFinish', title: 'Interior Finish', summary: finishOpt.label },
+    { id: 'furniture', title: 'Furniture', summary: furniture.length ? furniture.join(', ') : 'None selected' },
+    { id: 'appliances', title: 'Appliances', summary: appliances.length ? appliances.join(', ') : 'None selected' },
+  ];
 
   return (
     <section id="configure" className="py-24 bg-white border-t-2 border-gray-100 scroll-mt-28">
@@ -225,24 +250,11 @@ export default function ConfiguratorSection() {
               <title>Capsule preview</title>
               <desc>Top-down schematic that updates as you build your capsule</desc>
 
-              {deckId === 'wrap' && (
+              {deckId === 'deck' && (
                 <rect
-                  x={shellX - 12}
-                  y={SHELL_Y - 12}
-                  width={shellWidth + 24}
-                  height={SHELL_H + 24}
-                  rx={shellRx + 10}
-                  fill="none"
-                  stroke="#c4b28a"
-                  strokeWidth="2"
-                  strokeDasharray="6 4"
-                />
-              )}
-              {(deckId === '4ft' || deckId === '6ft') && (
-                <rect
-                  x={shellX - (deckId === '4ft' ? 30 : 46)}
+                  x={shellX - 36}
                   y={SHELL_Y + 10}
-                  width={deckId === '4ft' ? 30 : 46}
+                  width="36"
                   height={SHELL_H - 20}
                   fill="#EADFC7"
                   stroke="#c4b28a"
@@ -255,48 +267,56 @@ export default function ConfiguratorSection() {
                 y={SHELL_Y}
                 width={shellWidth}
                 height={SHELL_H}
-                rx={shellRx}
+                rx={model.shellRx}
                 fill={colorOpt.hex}
                 stroke="#1f2937"
-                strokeWidth={shellStrokeWidth}
+                strokeWidth="1.5"
               />
-              {styleId === 'wood' &&
-                Array.from({ length: 6 }).map((_, i) => (
-                  <line
-                    key={i}
-                    x1={shellX + 20 + i * ((shellWidth - 40) / 5)}
-                    y1={SHELL_Y + 8}
-                    x2={shellX + 20 + i * ((shellWidth - 40) / 5)}
-                    y2={SHELL_Y + SHELL_H - 8}
-                    stroke="#7a5230"
-                    strokeWidth="1"
-                    opacity="0.4"
-                  />
-                ))}
 
-              {layout.zones.length === 0 && (
-                <text x={VIEWBOX_W / 2} y={SHELL_Y + SHELL_H / 2} textAnchor="middle" fontSize="13" fill={colorId === 'black' || colorId === 'navy' ? '#e5e7eb' : '#6b7280'}>
-                  Open floor plan
-                </text>
-              )}
-              {layout.zones.map((z) => {
-                const style = kindStyles[z.kind];
-                const zoneY = SHELL_Y + (SHELL_H - ZONE_H) / 2;
-                return (
-                  <g key={z.kind}>
-                    <rect x={z.x} y={zoneY} width={z.width} height={ZONE_H} rx="8" fill={style.fill} stroke={style.stroke} strokeWidth="1" />
-                    <text x={z.x + z.width / 2} y={zoneY + ZONE_H / 2 + 4} textAnchor="middle" fontSize="10" fill={style.text} fontWeight="600">
-                      {z.label}
-                    </text>
-                  </g>
-                );
-              })}
+              {[0.15, 0.5, 0.85].map((frac, i) => (
+                <line
+                  key={i}
+                  x1={shellX + shellWidth * frac}
+                  y1={SHELL_Y + SHELL_H}
+                  x2={shellX + shellWidth * frac}
+                  y2={SHELL_Y + SHELL_H + legPixelHeight}
+                  stroke="#6b7280"
+                  strokeWidth="3"
+                />
+              ))}
 
-              <line x1={shellX} y1={SHELL_Y + SHELL_H + 26} x2={shellX + shellWidth} y2={SHELL_Y + SHELL_H + 26} stroke="#9ca3af" strokeWidth="1" />
-              <text x={shellX + shellWidth / 2} y={SHELL_Y + SHELL_H + 46} textAnchor="middle" fontSize="12" fill="#6b7280" fontWeight="600">
-                {width} ft x {length} ft x {height} ft — {sqft} sqft
+              <text
+                x={VIEWBOX_W / 2}
+                y={SHELL_Y + SHELL_H / 2 + 4}
+                textAnchor="middle"
+                fontSize="13"
+                fill={colorId === 'black' || colorId === 'charcoal' ? '#e5e7eb' : '#4b5563'}
+                fontWeight="600"
+              >
+                {model.label}
+              </text>
+
+              <text
+                x={shellX + shellWidth / 2}
+                y={SHELL_Y + SHELL_H + legPixelHeight + 26}
+                textAnchor="middle"
+                fontSize="12"
+                fill="#6b7280"
+                fontWeight="600"
+              >
+                {sizeStr} ft — {size.sqft} sqft
               </text>
             </svg>
+
+            {summaryChips.length > 6 && (
+              <div className="mt-4 flex flex-wrap gap-2">
+                {[...furniture, ...appliances].map((item) => (
+                  <span key={item} className="text-xs px-3 py-1 rounded-full bg-white border border-gray-200 text-gray-600">
+                    {item}
+                  </span>
+                ))}
+              </div>
+            )}
 
             <div className="mt-6 pt-6 border-t border-gray-200">
               <p className="text-xs uppercase tracking-widest text-gray-500 font-semibold mb-1">Estimated price</p>
@@ -306,14 +326,7 @@ export default function ConfiguratorSection() {
           </div>
 
           <div>
-            {[
-              { id: 'model', title: 'Model', summary: model.label },
-              { id: 'size', title: 'Size', summary: `${width} x ${length} x ${height} ft — ${sqft} sqft` },
-              { id: 'style', title: 'Exterior Style', summary: styleOpt.label },
-              { id: 'color', title: 'Color', summary: colorOpt.label },
-              { id: 'deck', title: 'Deck', summary: deckOpt.label },
-              { id: 'interior', title: 'Interior', summary: `${kitchenOpt.label} kitchen, ${bedroomOpt.label}` },
-            ].map(({ id, title, summary }) => {
+            {steps.map(({ id, title, summary }) => {
               const isOpen = openStep === id;
               return (
                 <div key={id} className="border-b border-gray-200 py-5">
@@ -340,67 +353,28 @@ export default function ConfiguratorSection() {
                       {id === 'model' && <PickerGrid options={MODELS} value={modelId} onChange={applyModel} />}
 
                       {id === 'size' && (
-                        <div>
-                          <p className="text-sm uppercase tracking-widest text-gray-500 font-semibold mb-3">Width</p>
-                          <div className="flex flex-wrap gap-3 mb-6">
-                            {WIDTH_OPTIONS.map((w) => (
-                              <button
-                                key={w}
-                                onClick={() => setWidth(w)}
-                                className={`px-5 py-2 rounded-lg text-sm font-semibold border-2 ${
-                                  width === w ? 'bg-gray-900 border-gray-900 text-white' : 'bg-white border-gray-200 text-gray-700 hover:border-gray-400'
-                                }`}
-                              >
-                                {w} ft
-                              </button>
-                            ))}
-                          </div>
-                          <p className="text-sm uppercase tracking-widest text-gray-500 font-semibold mb-3">Length</p>
-                          <div className="flex flex-wrap gap-3 mb-6">
-                            {LENGTH_OPTIONS.map((l) => (
-                              <button
-                                key={l}
-                                onClick={() => setLength(l)}
-                                className={`px-5 py-2 rounded-lg text-sm font-semibold border-2 ${
-                                  length === l ? 'bg-gray-900 border-gray-900 text-white' : 'bg-white border-gray-200 text-gray-700 hover:border-gray-400'
-                                }`}
-                              >
-                                {l} ft
-                              </button>
-                            ))}
-                          </div>
-                          <p className="text-sm uppercase tracking-widest text-gray-500 font-semibold mb-3">Height</p>
-                          <div className="flex flex-wrap gap-3 mb-6">
-                            {[8, 9, 10, 11].map((h) => (
-                              <button
-                                key={h}
-                                onClick={() => setHeight(h)}
-                                className={`px-5 py-2 rounded-lg text-sm font-semibold border-2 ${
-                                  height === h ? 'bg-gray-900 border-gray-900 text-white' : 'bg-white border-gray-200 text-gray-700 hover:border-gray-400'
-                                }`}
-                              >
-                                {h} ft
-                              </button>
-                            ))}
-                          </div>
-                          <p className="text-sm text-gray-600 font-light mb-4">
-                            Total area: <span className="font-semibold text-gray-900">{sqft} sqft</span>
-                          </p>
-                          <button
-                            onClick={() => setOpenStep(nextStepAfter('size'))}
-                            className="px-6 py-2 rounded-lg bg-gray-900 text-white text-sm font-semibold hover:bg-gray-800"
-                          >
-                            Done
-                          </button>
-                        </div>
+                        <PickerGrid
+                          options={model.sizes.map((s) => ({ id: s, label: `${s} ft` }))}
+                          value={sizeStr}
+                          onChange={(v) => {
+                            setSizeStr(v);
+                            setOpenStep(nextStepAfter('size'));
+                          }}
+                        />
                       )}
-
-                      {id === 'style' && <PickerGrid options={EXTERIOR_STYLES} value={styleId} onChange={chooseStyle} columns={2} />}
 
                       {id === 'color' && (
                         <div className="flex flex-wrap gap-4">
                           {COLORS.map((c) => (
-                            <button key={c.id} onClick={() => chooseColor(c.id)} className="flex flex-col items-center gap-2" aria-label={c.label}>
+                            <button
+                              key={c.id}
+                              onClick={() => {
+                                setColorId(c.id);
+                                setOpenStep(nextStepAfter('color'));
+                              }}
+                              className="flex flex-col items-center gap-2"
+                              aria-label={c.label}
+                            >
                               <span
                                 className="w-12 h-12 rounded-full border-2"
                                 style={{
@@ -415,17 +389,80 @@ export default function ConfiguratorSection() {
                         </div>
                       )}
 
-                      {id === 'deck' && <PickerGrid options={DECKS} value={deckId} onChange={chooseDeck} columns={2} />}
+                      {id === 'deck' && (
+                        <PickerGrid
+                          options={DECKS}
+                          value={deckId}
+                          onChange={(v) => {
+                            setDeckId(v);
+                            setOpenStep(nextStepAfter('deck'));
+                          }}
+                          columns={2}
+                        />
+                      )}
 
-                      {id === 'interior' && (
+                      {id === 'legHeight' && (
                         <div>
-                          <p className="text-sm uppercase tracking-widest text-gray-500 font-semibold mb-3">Kitchen</p>
-                          <PickerGrid options={KITCHENS} value={kitchenId} onChange={setKitchenId} />
-                          <p className="text-sm uppercase tracking-widest text-gray-500 font-semibold mb-3 mt-8">Bedroom</p>
-                          <PickerGrid options={BEDROOMS} value={bedroomId} onChange={setBedroomId} />
+                          <p className="text-sm uppercase tracking-widest text-gray-500 font-semibold mb-3">
+                            Leg height: <span className="text-gray-900 normal-case tracking-normal">{legHeight} ft</span>
+                          </p>
+                          <input
+                            type="range"
+                            min="1"
+                            max="5"
+                            step="1"
+                            value={legHeight}
+                            onChange={(e) => setLegHeight(Number(e.target.value))}
+                            className="w-full accent-gray-900"
+                          />
+                          <div className="flex justify-between text-xs text-gray-400 mt-1 mb-4">
+                            <span>1 ft</span>
+                            <span>5 ft</span>
+                          </div>
+                          <button
+                            onClick={() => setOpenStep(nextStepAfter('legHeight'))}
+                            className="px-6 py-2 rounded-lg bg-gray-900 text-white text-sm font-semibold hover:bg-gray-800"
+                          >
+                            Done
+                          </button>
+                        </div>
+                      )}
+
+                      {id === 'interiorFinish' && (
+                        <PickerGrid
+                          options={INTERIOR_FINISHES}
+                          value={interiorFinishId}
+                          onChange={(v) => {
+                            setInteriorFinishId(v);
+                            setOpenStep(nextStepAfter('interiorFinish'));
+                          }}
+                          columns={2}
+                        />
+                      )}
+
+                      {id === 'furniture' && (
+                        <div>
+                          <MultiSelectGrid items={model.furniture} selected={furniture} onToggle={toggleFurniture} priceMap={FURNITURE_PRICES} />
+                          <button
+                            onClick={() => setOpenStep(nextStepAfter('furniture'))}
+                            className="mt-5 px-6 py-2 rounded-lg bg-gray-900 text-white text-sm font-semibold hover:bg-gray-800"
+                          >
+                            Done
+                          </button>
+                        </div>
+                      )}
+
+                      {id === 'appliances' && (
+                        <div>
+                          <MultiSelectGrid
+                            items={APPLIANCES.map((a) => a.id)}
+                            selected={appliances}
+                            onToggle={toggleAppliance}
+                            priceMap={Object.fromEntries(APPLIANCES.map((a) => [a.id, a.price]))}
+                          />
                           <button
                             onClick={() => setOpenStep(null)}
-                            className="mt-6 px-6 py-2 rounded-lg bg-gray-900 text-white text-sm font-semibold hover:bg-gray-800"
+                            className="mt-5 px-6 py-2 rounded-lg bg-gray-900 text-white text-sm font-semibold hover:bg-gray-800"
                           >
                             Done
                           </button>
