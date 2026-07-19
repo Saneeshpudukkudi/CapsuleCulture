@@ -210,7 +210,7 @@ export default function ConfiguratorSection() {
   const whatsappMessage = encodeURIComponent(`Hi Capsule Culture, I'd like a quote for: ${summaryLine}. Estimated price: ${formatINR(price)}.`);
 
   return (
-    <section id="configure" className="py-24 bg-white border-t-2 border-gray-100">
+    <section id="configure" className="py-24 bg-white border-t-2 border-gray-100 scroll-mt-28">
       <div className="max-w-7xl mx-auto px-6 sm:px-8">
         <div className="mb-10">
           <p className="text-xs uppercase tracking-widest text-gray-500 font-inter font-semibold mb-2">Build Your Own</p>
@@ -437,9 +437,11 @@ export default function ConfiguratorSection() {
               );
             })}
 
-<div className="flex flex-wrap gap-4">
+            <div className="pt-8">
+              <p className="text-gray-700 font-light mb-6">{summaryLine}.</p>
+              <div className="flex flex-wrap gap-4">
                 
-                  <a href={`https://wa.me/918848337921?text=${whatsappMessage}`}
+                  href={`https://wa.me/918848337921?text=${whatsappMessage}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="px-8 py-4 bg-green-500 text-white rounded-lg font-semibold hover:bg-green-600 transition-colors"
@@ -447,7 +449,7 @@ export default function ConfiguratorSection() {
                   WhatsApp Quote
                 </a>
                 
-                  <a href="#contact"
+                  href="#contact"
                   className="px-8 py-4 border-2 border-gray-900 text-gray-900 rounded-lg font-semibold hover:bg-gray-900 hover:text-white transition-colors"
                 >
                   Get a Detailed Quote
