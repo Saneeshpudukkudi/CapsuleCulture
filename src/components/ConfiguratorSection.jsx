@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 
 const VIEWBOX_W = 600;
-const VIEWBOX_H = 300;
+const VIEWBOX_H = 340;
 const SHELL_Y = 90;
 const SHELL_H = 120;
 const MIN_SHELL_W = 220;
@@ -251,54 +251,58 @@ export default function ConfiguratorSection() {
               <desc>Top-down schematic that updates as you build your capsule</desc>
 
               {deckId === 'deck' && (
-                <rect
-                  x={shellX - 36}
-                  y={SHELL_Y + 10}
-                  width="36"
-                  height={SHELL_H - 20}
+                <polygon
+                  points={`
+                    ${shellX + shellWidth * 0.15},${SHELL_Y + SHELL_H - 8}
+                    ${shellX + shellWidth * 0.85},${SHELL_Y + SHELL_H - 8}
+                    ${shellX + shellWidth + 14},${SHELL_Y + SHELL_H + 44}
+                    ${shellX - 14},${SHELL_Y + SHELL_H + 44}
+                  `}
                   fill="#EADFC7"
                   stroke="#c4b28a"
                   strokeWidth="1"
                 />
               )}
 
-              <rect
-                x={shellX}
-                y={SHELL_Y}
-                width={shellWidth}
-                height={SHELL_H}
-                rx={model.shellRx}
-                fill={colorOpt.hex}
-                stroke="#1f2937"
-                strokeWidth="1.5"
-              />
-
-              {[0.15, 0.5, 0.85].map((frac, i) => (
-                <line
-                  key={i}
-                  x1={shellX + shellWidth * frac}
-                  y1={SHELL_Y + SHELL_H}
-                  x2={shellX + shellWidth * frac}
-                  y2={SHELL_Y + SHELL_H + legPixelHeight}
-                  stroke="#6b7280"
-                  strokeWidth="3"
+              <g transform={`rotate(6 ${shellX + shellWidth / 2} ${SHELL_Y + SHELL_H / 2})`}>
+                <rect
+                  x={shellX}
+                  y={SHELL_Y}
+                  width={shellWidth}
+                  height={SHELL_H}
+                  rx={model.shellRx}
+                  fill={colorOpt.hex}
+                  stroke="#1f2937"
+                  strokeWidth="1.5"
                 />
-              ))}
 
-              <text
-                x={VIEWBOX_W / 2}
-                y={SHELL_Y + SHELL_H / 2 + 4}
-                textAnchor="middle"
-                fontSize="13"
-                fill={colorId === 'black' || colorId === 'charcoal' ? '#e5e7eb' : '#4b5563'}
-                fontWeight="600"
-              >
-                {model.label}
-              </text>
+                {[0.15, 0.5, 0.85].map((frac, i) => (
+                  <line
+                    key={i}
+                    x1={shellX + shellWidth * frac}
+                    y1={SHELL_Y + SHELL_H}
+                    x2={shellX + shellWidth * frac}
+                    y2={SHELL_Y + SHELL_H + legPixelHeight}
+                    stroke="#6b7280"
+                    strokeWidth="3"
+                  />
+                ))}
+
+                <text
+                  x={shellX + shellWidth / 2}
+                  y={SHELL_Y + SHELL_H / 2 + 4}
+                  textAnchor="middle"
+                  fontSize="13"
+                  fill={colorId === 'black' || colorId === 'charcoal' ? '#e5e7eb' : '#4b5563'}
+                  fontWeight="600"
+                >
+                  {model.label}
+                </text>
+              </g>
 
               <text
                 x={shellX + shellWidth / 2}
-                y={SHELL_Y + SHELL_H + legPixelHeight + 26}
+                y={SHELL_Y + SHELL_H + legPixelHeight + 60}
                 textAnchor="middle"
                 fontSize="12"
                 fill="#6b7280"
@@ -478,7 +482,7 @@ export default function ConfiguratorSection() {
               <p className="text-gray-700 font-light mb-6">{summaryLine}.</p>
               <div className="flex flex-wrap gap-4">
                 
-                  <a href={`https://wa.me/918848337921?text=${whatsappMessage}`}
+                  href={`https://wa.me/918848337921?text=${whatsappMessage}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="px-8 py-4 bg-green-500 text-white rounded-lg font-semibold hover:bg-green-600 transition-colors"
@@ -486,7 +490,7 @@ export default function ConfiguratorSection() {
                   WhatsApp Quote
                 </a>
                 
-                  <a href="#contact"
+                  href="#contact"
                   className="px-8 py-4 border-2 border-gray-900 text-gray-900 rounded-lg font-semibold hover:bg-gray-900 hover:text-white transition-colors"
                 >
                   Get a Detailed Quote
