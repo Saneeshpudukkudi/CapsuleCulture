@@ -60,55 +60,90 @@ export default function CapsuleAssembly({ progress, reducedMotion }) {
       const mesh = add(new THREE.CylinderGeometry(radius, radius, delta.length(), 8), mat, stage, ...start.clone().add(end).multiplyScalar(.5).toArray());
       mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), delta.normalize());
     };
-    const W = 5.8, D = 3.5, Y = .78, H = 2.75;
+    // 20 ft × 10 ft × 8 ft: the long elevation is twice as wide as the depth.
+    const W = 7.2, D = 3.6, Y = .55, H = 2.88, R = .85;
+    const outline = (w, h, r, y = 0) => {
+      const s = new THREE.Shape(), x = -w / 2, right = w / 2;
+      s.moveTo(x + r, y); s.lineTo(right - r, y);
+      s.quadraticCurveTo(right, y, right, y + r);
+      s.lineTo(right, y + h - r);
+      s.quadraticCurveTo(right, y + h, right - r, y + h);
+      s.lineTo(x + r, y + h);
+      s.quadraticCurveTo(x, y + h, x, y + h - r);
+      s.lineTo(x, y + r); s.quadraticCurveTo(x, y, x + r, y);
+      return s;
+    };
+    const face = (stage, w, h, radius, z, mat, inset = 0) => {
+      const geometry = new THREE.ShapeGeometry(outline(w, h, radius, Y + inset), 16);
+      return add(geometry, mat, stage, 0, 0, z, { noShadow: true });
+    };
+    const rimFace = (stage, w, h, radius, thickness, z, mat) => {
+      const shape = outline(w, h, radius, Y);
+      const inner = outline(w - 2 * thickness, h - 2 * thickness, radius - thickness, Y + thickness);
+      const hole = new THREE.Path(inner.getPoints(16).reverse());
+      shape.holes.push(hole);
+      return add(new THREE.ShapeGeometry(shape, 16), mat, stage, 0, 0, z, { noShadow: true });
+    };
     // Ground and foundation
     const ground = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), new THREE.ShadowMaterial({ opacity: .15 }));
     ground.rotation.x = -Math.PI / 2; ground.position.y = -.035; ground.receiveShadow = true; scene.add(ground);
-    box(0, 0, .14, 0, 7.15, .28, 4.85, dark);
-    for (const x of [-2.35, 2.35]) for (const z of [-1.24, 1.24]) {
-      box(0, x, .45, z, .16, .68, .16, steel);
-      box(0, x, .09, z, .38, .08, .38, steel);
+    for (const x of [-2.7, 0, 2.7]) for (const z of [-1.24, 1.24]) {
+      box(0, x, .3, z, .24, .5, .24, steel);
+      box(0, x, .045, z, .58, .09, .58, dark);
     }
-    // Structural frame
-    for (const x of [-W/2, W/2]) for (const z of [-D/2, D/2]) rod(1, [x,Y,z],[x,Y+H,z], .055, steel);
+    // Long rounded elevation, with matching structural curves at both ends.
     for (const y of [Y,Y+H]) {
-      for (const z of [-D/2,D/2]) rod(1,[-W/2,y,z],[W/2,y,z],.055,steel);
-      for (const x of [-W/2,W/2]) rod(1,[x,y,-D/2],[x,y,D/2],.055,steel);
+      for (const z of [-D/2,D/2]) rod(1,[-W/2+R,y,z],[W/2-R,y,z],.055,steel);
     }
-    for (const x of [-1.45,0,1.45]) {
-      rod(1,[x,Y,-D/2],[x,Y+H,-D/2],.035,steel);
-      rod(1,[x,Y,D/2],[x,Y+H,D/2],.035,steel);
+    for (const z of [-D/2,D/2]) {
+      for (const x of [-W/2,W/2]) rod(1,[x,Y+R,z],[x,Y+H-R,z],.055,steel);
+      for (const [cx,cy,start,end] of [[W/2-R,Y+R,-Math.PI/2,0],[W/2-R,Y+H-R,0,Math.PI/2],[-W/2+R,Y+H-R,Math.PI/2,Math.PI],[-W/2+R,Y+R,Math.PI,3*Math.PI/2]]) {
+        const pts = Array.from({length:9},(_,i)=>new THREE.Vector3(cx+R*Math.cos(start+(end-start)*i/8),cy+R*Math.sin(start+(end-start)*i/8),z));
+        add(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),12,.055,8,false),steel,1,0,0,0);
+      }
     }
+    for (const x of [-2,0,2]) {
+      for (const z of [-D/2,D/2]) rod(1,[x,Y,z],[x,Y+H,z],.034,steel);
+    }
+    for (const x of [-W/2+R,W/2-R]) for (const y of [Y,Y+H]) rod(1,[x,y,-D/2],[x,y,D/2],.05,steel);
     // Insulated floor and rear shell
-    box(2,0,Y+.08,0,W,.16,D,floorMat);
-    for (let x=-2.5; x<2.8; x+=.52) box(2,x,Y+.167,0,.018,.018,D-.22,wood);
-    box(2,0,Y+H/2,-D/2,W-.1,H-.12,.12,cream);
-    box(2,-W/2,Y+H/2,0,.12,H-.12,D-.12,cream);
-    box(2,W/2,Y+H/2,0,.12,H-.12,D-.12,cream);
-    // Front glazing with dark mullions
-    box(3,0,Y+H/2,D/2-.01,W-.18,H-.2,.035,glass);
-    for (const x of [-1.45,0,1.45]) rod(3,[x,Y,D/2+.045],[x,Y+H,D/2+.045],.036,dark);
-    rod(3,[-W/2,Y+.66,D/2+.04],[W/2,Y+.66,D/2+.04],.03,dark);
-    box(3,2.2,Y+H/2,D/2+.08,.025,H-.25,.055,dark);
-    box(3,2.06,Y+1.35,D/2+.11,.035,.24,.06,steel);
+    box(2,0,Y+.07,0,W-2*R,.14,D,floorMat);
+    face(2,W,H,R,-D/2+.06,cream);
+    // Glazing follows the rounded silhouette, with an uninterrupted side shell.
+    face(3,W-.3,H-.3,R-.15,D/2-.01,glass,.15);
+    rimFace(3,W,H,R,.15,D/2+.025,dark);
+    for (const x of [-2,0,2]) rod(3,[x,Y+.15,D/2+.06],[x,Y+H-.15,D/2+.06],.032,dark);
+    rod(3,[-W/2+R,Y+.65,D/2+.06],[W/2-R,Y+.65,D/2+.06],.027,dark);
+    box(3,1.98,Y+1.42,D/2+.11,.035,.25,.06,steel);
     // Interior: cabinetry, sofa, bed, lighting
-    box(4,-1.76,Y+.46,-1.08,1.55,.73,.65,wood);
-    box(4,-1.76,Y+.85,-1.08,1.6,.08,.7,floorMat);
-    box(4,1.65,Y+.43,-.9,1.55,.48,1.25,dark);
-    box(4,1.65,Y+.74,-1.46,1.55,.42,.2,cream);
-    box(4,1.65,Y+.72,-.9,1.4,.13,1.1,cream);
+    box(4,-2,Y+.46,-1.08,1.4,.73,.65,wood);
+    box(4,-2,Y+.85,-1.08,1.45,.08,.7,floorMat);
+    box(4,1.7,Y+.43,-.9,1.55,.48,1.25,dark);
+    box(4,1.7,Y+.74,-1.46,1.55,.42,.2,cream);
+    box(4,1.7,Y+.72,-.9,1.4,.13,1.1,cream);
     box(4,-.25,Y+.41,.37,1.4,.16,.7,wood);
     box(4,-.25,Y+.24,.37,.08,.35,.08,steel);
-    for (const x of [-1.5,0,1.5]) box(4,x,Y+H-.16,0,.8,.018,.035,glow);
-    // Roof and upper trim
-    box(5,0,Y+H+.08,0,W+.27,.17,D+.27,cream);
-    box(5,0,Y+H+.18,0,W+.12,.035,D+.12,dark);
+    for (const x of [-2,0,2]) box(4,x,Y+H-.16,0,.8,.018,.035,glow);
+    // Curved end shell and long roof, leaving the glazing visible.
+    for (const side of [-1,1]) {
+      const corner = new THREE.Shape();
+      const cx = side * (W/2-R), cy = Y+H-R;
+      corner.moveTo(cx,cy); corner.lineTo(side*W/2,cy);
+      for(let i=1;i<=12;i++) {
+        const angle = Math.PI/2*i/12;
+        corner.lineTo(cx+side*R*Math.cos(angle),cy+R*Math.sin(angle));
+      }
+      corner.closePath();
+      add(new THREE.ExtrudeGeometry(corner,{depth:D,bevelEnabled:false}),cream,5,0,0,-D/2);
+    }
+    box(5,0,Y+H+.03,0,W-2*R,.1,D+.12,cream);
+    box(5,0,Y+H+.095,0,W-2*R,.025,D+.12,dark);
     // Deck and finishing details
-    box(6,0,.25,D/2+1.06,5.1,.18,2.0,wood);
-    for (let x=-2.45; x<2.5; x+=.37) box(6,x,.35,D/2+1.06,.012,.012,1.84,dark);
+    box(6,0,.25,D/2+1.06,5.3,.18,2.0,wood);
+    for (let x=-2.55; x<2.6; x+=.37) box(6,x,.35,D/2+1.06,.012,.012,1.84,dark);
     box(6,0,.22,D/2+2.22,2.4,.12,.4,wood);
     box(6,0,.1,D/2+2.47,2.4,.12,.4,wood);
-    const ring = new THREE.Mesh(new THREE.TorusGeometry(5.0,.012,4,80), new THREE.MeshBasicMaterial({ color: 0x9bbdb2, transparent: true, opacity: .35 }));
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(5.4,.012,4,80), new THREE.MeshBasicMaterial({ color: 0x9bbdb2, transparent: true, opacity: .35 }));
     ring.rotation.x = Math.PI/2; ring.position.y = -.01; scene.add(ring);
 
     const resize = () => {
@@ -116,7 +151,7 @@ export default function CapsuleAssembly({ progress, reducedMotion }) {
       if (!w || !h) return;
       renderer.setSize(w,h,false); camera.aspect=w/h;
       camera.fov = w < 560 ? 43 : 34;
-      camera.position.set(w < 560 ? 12 : 10, 7, w < 560 ? 15 : 12);
+      camera.position.set(w < 560 ? 13 : 11, 7, w < 560 ? 18 : 15);
       camera.updateProjectionMatrix();
     };
     const observer = new ResizeObserver(resize); observer.observe(host); resize();
