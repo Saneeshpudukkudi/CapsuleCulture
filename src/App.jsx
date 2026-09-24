@@ -38,8 +38,10 @@ function BuildStory() {
       const el = section.current;
       if (el) {
         const rect = el.getBoundingClientRect();
-        const travel = rect.height;
-        setProgress(Math.max(0, Math.min(1, (window.innerHeight * .48 - rect.top) / Math.max(1, travel))));
+        // Complete the assembly when the final story card reaches the reading position.
+        const cardHeight = el.querySelector('.build-step')?.getBoundingClientRect().height || window.innerHeight;
+        const travel = Math.max(1, rect.height - cardHeight);
+        setProgress(Math.max(0, Math.min(1, (window.innerHeight * .5 - rect.top - cardHeight * .5) / travel)));
       }
       ticking = false;
     };
