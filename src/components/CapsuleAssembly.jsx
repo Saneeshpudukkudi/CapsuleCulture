@@ -138,6 +138,19 @@ export default function CapsuleAssembly({ progress, reducedMotion }) {
     }
     box(5,0,Y+H+.03,0,W-2*R,.1,D+.12,cream);
     box(5,0,Y+H+.095,0,W-2*R-.38,.018,D-.38,dark);
+    // The final pass closes the front with exterior cladding, a door and trim.
+    // Keep the centre bays glazed so the furnished interior remains visible.
+    rimFace(6,W,H,R,.22,D/2+.14,cream);
+    rimFace(6,W-.22,H-.22,R-.11,.035,D/2+.155,dark);
+    box(6,-2.48,Y+H/2,D/2+.18,.82,H-1.24,.075,wood);
+    for (const x of [-2.82,-2.62,-2.42,-2.22]) {
+      box(6,x,Y+H/2,D/2+.24,.055,H-1.25,.028,cream);
+    }
+    // A framed sliding entry and a warm light line are visible at full build.
+    for (const x of [.17,1.82]) rod(6,[x,Y+.2,D/2+.19],[x,Y+H-.28,D/2+.19],.026,dark);
+    rod(6,[.17,Y+H-.28,D/2+.19],[1.82,Y+H-.28,D/2+.19],.026,dark);
+    box(6,1.62,Y+1.3,D/2+.23,.035,.26,.04,steel);
+    box(6,0,Y+H-.2,D/2+.2,4.7,.028,.03,glow);
     // Deck and finishing details
     box(6,0,.25,D/2+1.06,5.3,.18,2.0,wood);
     for (let x=-2.55; x<2.6; x+=.37) box(6,x,.35,D/2+1.06,.012,.012,1.84,dark);
