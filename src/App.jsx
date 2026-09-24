@@ -16,13 +16,13 @@ const questions = [
   ['What is included in the warranty?', 'Coverage depends on the agreed specification and contract. The applicable terms will be set out in your quotation.'],
 ];
 const buildStages = [
-  ['01', 'A strong start.', 'Every great space starts with a plan for its site. The raised platform and supports establish the footprint.'],
-  ['02', 'The frame takes shape.', 'A galvanized steel structure establishes the form of the capsule and supports its enclosure.'],
-  ['03', 'A space to live in.', 'The floor and insulated enclosure bring comfort and definition to the space.'],
-  ['04', 'Light comes in.', 'Toughened glazing connects the interior with its surroundings and gives the capsule its open feel.'],
-  ['05', 'Made for your life.', 'Interior fittings, furniture and lighting are planned around how you will use the space.'],
-  ['06', 'Weather ready.', 'The roof, protective coating and PU exterior finish complete the shell and its architectural profile.'],
-  ['07', 'Ready to make yours.', 'The final details bring the design together. Let’s discuss the size, site and features for your project.'],
+  ['01', 'A strong start.', 'Our illustrated 20 ft × 10 ft living capsule rests on raised supports. The foundation is planned around your site.'],
+  ['02', 'The capsule takes shape.', 'A welded GP pipe frame sets out the long footprint and gently rounded capsule silhouette.'],
+  ['03', 'Comfort inside.', 'The floor uses fiber cement board and tile cladding. Insulation sits between the GP sheet body and the interior ceiling.'],
+  ['04', 'Light comes in.', '10 mm toughened glass on the front and back areas brings daylight into the living space.'],
+  ['05', 'Made for living.', 'A queen-size bed, two-seat sofa, wardrobe, bathroom fittings and ambient lighting make the space usable.'],
+  ['06', 'Weather ready.', 'Epoxy primer, waterproofed joints and a PU painted exterior complete the rounded protective shell.'],
+  ['07', 'Ready to make yours.', 'This 200 sq ft illustration shows one possible layout. We tailor the design and specifications to your project.'],
 ];
 
 function BuildStory() {
