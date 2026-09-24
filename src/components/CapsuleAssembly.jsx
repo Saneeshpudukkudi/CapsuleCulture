@@ -137,7 +137,7 @@ export default function CapsuleAssembly({ progress, reducedMotion }) {
       add(new THREE.ExtrudeGeometry(corner,{depth:D,bevelEnabled:false}),cream,5,0,0,-D/2);
     }
     box(5,0,Y+H+.03,0,W-2*R,.1,D+.12,cream);
-    box(5,0,Y+H+.095,0,W-2*R,.025,D+.12,dark);
+    box(5,0,Y+H+.095,0,W-2*R-.38,.018,D-.38,dark);
     // Deck and finishing details
     box(6,0,.25,D/2+1.06,5.3,.18,2.0,wood);
     for (let x=-2.55; x<2.6; x+=.37) box(6,x,.35,D/2+1.06,.012,.012,1.84,dark);
@@ -157,16 +157,20 @@ export default function CapsuleAssembly({ progress, reducedMotion }) {
     const observer = new ResizeObserver(resize); observer.observe(host); resize();
     let frame;
     let shown = 0;
+    let lastFrame = performance.now();
     function render() {
       const target = clamp(progressRef.current);
-      shown += (target - shown) * (reducedMotion ? 1 : .12);
+      const now = performance.now();
+      const elapsed = Math.min(.05, (now - lastFrame) / 1000);
+      lastFrame = now;
+      shown += (target - shown) * (reducedMotion ? 1 : 1 - Math.exp(-elapsed * 9));
       const stageFloat = shown * 6.8;
       stages.forEach((group, i) => {
-        const visibility = i === 0 ? 1 : smooth((stageFloat - (i-.3)) / .9);
+        const visibility = i === 0 ? 1 : smooth((stageFloat - (i-.45)) / 1.15);
         group.forEach(({mesh,targetY,baseOpacity}) => {
           mesh.visible = visibility > .002;
           mesh.material.opacity = baseOpacity * visibility;
-          mesh.position.y = targetY + (1 - visibility) * (i === 5 ? 2.1 : i === 6 ? -1.1 : .8);
+          mesh.position.y = targetY + (1 - visibility) * (i === 5 ? .85 : i === 6 ? -.5 : .45);
         });
       });
       root.rotation.y = -.2 + shown * .22;
